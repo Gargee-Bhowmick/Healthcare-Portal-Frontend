@@ -21,33 +21,40 @@ import PatientRegister from "../pages/auth/PatientRegister";
 import PatientLayout from "../layouts/PatientLayout";
 import DoctorLayout from "../layouts/DoctorLayout";
 
+// Protected Route
+import ProtectedRoute from "../components/common/ProtectedRoute";
+
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Default route redirects to patient dashboard */}
+      {/* Default route redirects to login */}
       <Route path="/" element={<Navigate to="/login" />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<PatientRegister />} />
 
-      {/* Patient Routes */}
-      <Route path="/patient" element={<PatientLayout />}>
-        <Route index element={<BookAppointment />} /> {/* Default page under patient */}
-        <Route path="book-appointment" element={<BookAppointment />} />
-        <Route path="doctor-profile" element={<DoctorProfile />} />
-        <Route path="doctors-list" element={<DoctorsList />} />
-        <Route path="medical-history" element={<MedicalHistory />} />
-        <Route path="my-appointments" element={<MyAppointments />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="upload-medical-history" element={<UploadMedicalHistory />} />
-      </Route>
+      {/* Protected Patient Routes */}
+      {/* <Route element={<ProtectedRoute allowedRoles={["patient"]} />}> */}
+        <Route path="/patient" element={<PatientLayout />}>
+          <Route index element={<BookAppointment />} />
+          <Route path="book-appointment" element={<BookAppointment />} />
+          <Route path="doctor-profile" element={<DoctorProfile />} />
+          <Route path="doctors-list" element={<DoctorsList />} />
+          <Route path="medical-history" element={<MedicalHistory />} />
+          <Route path="my-appointments" element={<MyAppointments />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="upload-medical-history" element={<UploadMedicalHistory />} />
+        </Route>
+      {/* </Route> */}
 
-      {/* Doctor Routes */}
-      <Route path="/doctor" element={<DoctorLayout />}>
-        <Route index element={<PatientDetails />} /> {/* Default page under doctor */}
-        <Route path="patient-details" element={<PatientDetails />} />
-        <Route path="timetable" element={<Timetable />} />
-      </Route>
+      {/* Protected Doctor Routes */}
+      {/* <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}> */}
+        <Route path="/doctor" element={<DoctorLayout />}>
+          <Route index element={<PatientDetails />} />
+          <Route path="patient-details" element={<PatientDetails />} />
+          <Route path="timetable" element={<Timetable />} />
+        </Route>
+      {/* </Route> */}
     </Routes>
   );
 }
