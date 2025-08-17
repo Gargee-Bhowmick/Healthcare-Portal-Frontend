@@ -1,8 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-// Layouts
-import PatientDashboard from "./pages/patient/Dashboard";
-import DoctorDashboard from "./pages/doctor/Dashboard";
 
 // Patient Pages
 import BookAppointment from "./pages/patient/BookAppointment";
@@ -17,15 +14,20 @@ import UploadMedicalHistory from "./pages/patient/UploadMedicalHistory";
 import PatientDetails from "./pages/doctor/PatientDetails";
 import Timetable from "./pages/doctor/Timetable";
 
+import Login from "./pages/auth/Login";
+import PatientLayout from "./layouts/PatientLayout";
+import DoctorLayout from "./layouts/DoctorLayout";
+
 export default function App() {
   return (
     <Router>
       <Routes>
         {/* Default route redirects to patient dashboard */}
-        <Route path="/" element={<Navigate to="/patient" />} />
+        <Route path="/" element={<Navigate to="/login" />} />
 
+        <Route path="/login" element={<Login />} />
         {/* Patient Routes */}
-        <Route path="/patient" element={<PatientDashboard />}>
+        <Route path="/patient" element={<PatientLayout />}>
           <Route index element={<BookAppointment />} /> {/* Default page under patient */}
           <Route path="book-appointment" element={<BookAppointment />} />
           <Route path="doctor-profile" element={<DoctorProfile />} />
@@ -37,7 +39,7 @@ export default function App() {
         </Route>
 
         {/* Doctor Routes */}
-        <Route path="/doctor" element={<DoctorDashboard />}>
+        <Route path="/doctor" element={<DoctorLayout />}>
           <Route index element={<PatientDetails />} /> {/* Default page under doctor */}
           <Route path="patient-details" element={<PatientDetails />} />
           <Route path="timetable" element={<Timetable />} />
