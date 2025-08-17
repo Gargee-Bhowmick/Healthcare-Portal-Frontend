@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Button,
@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   Alert,
+  Link,
 } from "@mui/material";
 
 const Login = () => {
@@ -34,9 +35,9 @@ const Login = () => {
       localStorage.setItem("role", data.role);
 
       if (data.role === "doctor") {
-        navigate("/doctor/dashboard");
+        navigate("/doctor");
       } else if (data.role === "patient") {
-        navigate("/patient/dashboard");
+        navigate("/patient");
       } else {
         setError("Unknown user role");
       }
@@ -122,6 +123,24 @@ const Login = () => {
               Login
             </Button>
           </form>
+
+          {/* Register Option */}
+          <Typography
+            variant="body2"
+            textAlign="center"
+            mt={3}
+            color="text.secondary"
+          >
+            New patient?{" "}
+            <Link
+              component={RouterLink}
+              to="/register"
+              underline="hover"
+              sx={{ fontWeight: 500 }}
+            >
+              Register now
+            </Link>
+          </Typography>
         </CardContent>
       </Card>
     </Box>

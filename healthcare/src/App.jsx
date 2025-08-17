@@ -17,6 +17,7 @@ import Timetable from "./pages/doctor/Timetable";
 import Login from "./pages/auth/Login";
 import PatientLayout from "./layouts/PatientLayout";
 import DoctorLayout from "./layouts/DoctorLayout";
+import PatientRegister from "./pages/auth/PatientRegister";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" />} />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element = {<PatientRegister/>} />
         {/* Patient Routes */}
         <Route path="/patient" element={<PatientLayout />}>
           <Route index element={<BookAppointment />} /> {/* Default page under patient */}
