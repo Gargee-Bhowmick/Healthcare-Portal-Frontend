@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import PersonIcon from "@mui/icons-material/Person";
+import { useNavigate } from "react-router-dom";
 
 // Generate 30-min slots for 9 hours (8:00 to 16:30)
 const timeSlots = [];
@@ -71,6 +72,7 @@ const bookings = {
 
 const Timetable = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -159,7 +161,7 @@ const Timetable = () => {
                       {booking ? (
                         <Tooltip title={`View ${booking.patientName}'s profile`} arrow>
                           <Link
-                            href={`/patient/${booking.patientId}`}
+                            component="button"
                             underline="none"
                             color="primary"
                             sx={{
@@ -178,6 +180,7 @@ const Timetable = () => {
                                 textDecoration: "underline",
                               },
                             }}
+                            onClick={() => navigate(`/doctor/patient-details/${booking.patientId}`)}
                           >
                             <PersonIcon sx={{ fontSize: 18, mr: 0.5 }} />
                             {booking.patientName}
@@ -212,7 +215,7 @@ const Timetable = () => {
         * Click on a patient name to view their profile.
       </Typography>
     </Box>
-  );
-};
+    );
+    };
 
-export default Timetable;
+    export default Timetable;

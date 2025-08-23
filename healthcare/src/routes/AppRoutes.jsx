@@ -51,7 +51,7 @@ export default function AppRoutes() {
       {/* <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}> */}
         <Route path="/doctor" element={<DoctorLayout />}>
           <Route index element={<PatientDetails />} />
-          <Route path="patient-details" element={<PatientDetails />} />
+          <Route path="patient-details/:id?" element={<PatientDetails />} />
           <Route path="timetable" element={<Timetable />} />
         </Route>
       {/* </Route> */}
