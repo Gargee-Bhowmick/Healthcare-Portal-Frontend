@@ -1,11 +1,11 @@
 import React from "react";
 import Layout from "./Layout";
-import { FaUserInjured, FaCalendarAlt, FaClipboardList } from "react-icons/fa";
+import { FaUserInjured, FaCalendarAlt, FaUserMd } from "react-icons/fa";
 
   const navItems = [
     { title: "Patient Details", icon: <FaUserInjured className="text-xl" />, link: "patient-details" },
     { title: "Timetable", icon: <FaCalendarAlt className="text-xl" />, link: "timetable" },
-    { title: "Profile", icon: <FaCalendarAlt className="text-xl" />, link: "profile" }
+    { title: "Profile", icon: <FaUserMd className="text-xl" />, link: "profile" }
   ];
 
 const DoctorLayout = () => {
