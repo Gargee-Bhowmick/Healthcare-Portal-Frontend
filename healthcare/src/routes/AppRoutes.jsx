@@ -12,6 +12,7 @@ import UploadMedicalHistory from "../pages/patient/UploadMedicalHistory";
 // Doctor Pages
 import PatientDetails from "../pages/doctor/PatientDetails";
 import Timetable from "../pages/doctor/Timetable";
+import DocProfile from "../pages/doctor/DocProfile";
 
 // Auth Pages
 import Login from "../pages/auth/Login";
@@ -53,6 +54,7 @@ export default function AppRoutes() {
           <Route index element={<PatientDetails />} />
           <Route path="patient-details/:id?" element={<PatientDetails />} />
           <Route path="timetable" element={<Timetable />} />
+          <Route path="profile" element={<DocProfile />} />
         </Route>
       {/* </Route> */}
     </Routes>
