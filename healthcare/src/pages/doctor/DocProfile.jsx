@@ -1,4 +1,5 @@
-import React from "react";
+import {useContext} from "react";
+import AppContext from "../../context/appContext"
 import {
   Box,
   Card,
@@ -23,6 +24,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import LanguageIcon from "@mui/icons-material/Language";
 import SchoolIcon from "@mui/icons-material/School";
@@ -30,75 +32,9 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
-// Example doctor data (replace with real data or props as needed)
-const doctor = {
-  fullName: "Dr. Priya Sharma",
-  photo:
-    "https://randomuser.me/api/portraits/women/68.jpg",
-  gender: "Female",
-  contact: {
-    phone: "+91 98765 43210",
-    email: "priya.sharma@cityhospital.com",
-  },
-  qualifications: ["MBBS", "MD (Internal Medicine)", "FACP"],
-  specialization: "Cardiologist",
-  subSpecialization: "Interventional Cardiology",
-  experience: 15,
-  hospital: "City General Hospital",
-  department: "Cardiology",
-  designation: "Senior Consultant",
-  languages: ["English", "Hindi", "Bengali"],
-  consultingHours: [
-    { day: "Mon-Fri", time: "10:00 AM - 2:00 PM" },
-    { day: "Sat", time: "11:00 AM - 1:00 PM" },
-  ],
-  location: "123, Heart Avenue, City Center, New Delhi, India",
-  telemedicine: true,
-  appointmentSlots: [
-    "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "1:00 PM"
-  ],
-  patientsTreated: 2500,
-  license: {
-    number: "DL-123456",
-    state: "Delhi",
-  },
-  boardCertifications: [
-    "Medical Council of India",
-    "Delhi Medical Council",
-    "American Board of Internal Medicine",
-  ],
-  memberships: [
-    "Indian Medical Association",
-    "American College of Physicians",
-    "Cardiological Society of India",
-  ],
-  publications: [
-    {
-      title: "Advances in Cardiac Stent Technology",
-      journal: "Indian Heart Journal",
-      year: 2022,
-    },
-    {
-      title: "Managing Hypertension in Urban India",
-      journal: "Journal of Clinical Medicine",
-      year: 2021,
-    },
-  ],
-  awards: [
-    {
-      title: "Best Cardiologist Award",
-      by: "Delhi Medical Association",
-      year: 2023,
-    },
-    {
-      title: "Excellence in Patient Care",
-      by: "City General Hospital",
-      year: 2021,
-    },
-  ],
-};
 
 export default function DocProfile() {
+  const {doctor} = useContext(AppContext)
   return (
     <Box sx={{ p: { xs: 1, md: 4 }, bgcolor: "#f9fafb", minHeight: "100vh" }}>
       <Paper elevation={3} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, mb: 3 }}>

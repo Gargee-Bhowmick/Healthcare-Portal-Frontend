@@ -1,4 +1,5 @@
-import React from "react";
+import {useContext} from 'react'
+import AppContext from '../../context/appContext'
 import {
   Box,
   Typography,
@@ -31,49 +32,11 @@ for (let h = 8; h < 17; h++) {
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-// Example bookings: { [day]: { [time]: { patientName, patientId } } }
-const bookings = {
-  Monday: {
-    "08:00": { patientName: "John Doe", patientId: 1 },
-    "09:00": { patientName: "Jane Smith", patientId: 2 },
-    "10:30": { patientName: "Alice Brown", patientId: 3 },
-    "13:00": { patientName: "Night Owl", patientId: 6 },
-    "15:30": { patientName: "Sam Carter", patientId: 11 },
-  },
-  Tuesday: {
-    "08:30": { patientName: "Bob Lee", patientId: 4 },
-    "09:30": { patientName: "Charlie Kim", patientId: 5 },
-    "11:00": { patientName: "Diana Prince", patientId: 7 },
-    "14:00": { patientName: "Eve Adams", patientId: 12 },
-    "16:00": { patientName: "Frank Moore", patientId: 13 },
-  },
-  Wednesday: {
-    "08:00": { patientName: "Grace Hall", patientId: 8 },
-    "09:30": { patientName: "Henry Ford", patientId: 9 },
-    "12:00": { patientName: "Ivy Lane", patientId: 10 },
-    "13:30": { patientName: "Jack Frost", patientId: 14 },
-    "15:00": { patientName: "Karen Page", patientId: 15 },
-  },
-  Thursday: {
-    "08:30": { patientName: "Leo King", patientId: 16 },
-    "10:00": { patientName: "Mona Ray", patientId: 17 },
-    "11:30": { patientName: "Nina West", patientId: 18 },
-    "14:30": { patientName: "Oscar Wilde", patientId: 19 },
-    "16:30": { patientName: "Paul Young", patientId: 20 },
-  },
-  Friday: {
-    "09:00": { patientName: "Quinn Fox", patientId: 21 },
-    "10:30": { patientName: "Rita Stone", patientId: 22 },
-    "12:30": { patientName: "Steve Nash", patientId: 23 },
-    "14:00": { patientName: "Tina Bell", patientId: 24 },
-    "15:30": { patientName: "Uma Dale", patientId: 25 },
-  },
-};
 
 const Timetable = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-
+  const {bookings} = useContext(AppContext);
   return (
     <Box
       sx={{
