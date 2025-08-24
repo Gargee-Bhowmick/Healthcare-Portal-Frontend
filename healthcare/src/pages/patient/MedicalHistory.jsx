@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import AppContext from "../../context/appContext";
 import {
   Box,
   Paper,
@@ -40,94 +41,15 @@ import {
 } from "@mui/icons-material";
 
 const MedicalHistory = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [dateFilter, setDateFilter] = useState("All");
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-
-  // Mock data for medical records
-  const medicalRecords = [
-    {
-      id: 1,
-      title: "Blood Test Results",
-      category: "Lab Results",
-      date: "2024-12-15",
-      doctorName: "Dr. Sarah Johnson",
-      hospital: "City General Hospital",
-      description: "Complete blood count and lipid profile",
-      fileType: "pdf",
-    },
-    {
-      id: 2,
-      title: "Chest X-Ray",
-      category: "X-Ray/Imaging",
-      date: "2024-12-10",
-      doctorName: "Dr. Michael Chen",
-      hospital: "Metro Medical Center",
-      description: "Routine chest examination",
-      fileType: "image",
-    },
-    {
-      id: 3,
-      title: "Diabetes Medication",
-      category: "Prescription",
-      date: "2024-12-08",
-      doctorName: "Dr. Emily Rodriguez",
-      hospital: "Family Health Clinic",
-      description: "Metformin 500mg twice daily",
-      fileType: "pdf",
-    },
-    {
-      id: 4,
-      title: "Annual Physical Exam",
-      category: "Medical Report",
-      date: "2024-11-20",
-      doctorName: "Dr. James Wilson",
-      hospital: "Wellness Medical Group",
-      description: "Complete physical examination and health assessment",
-      fileType: "pdf",
-    },
-    {
-      id: 5,
-      title: "COVID-19 Vaccination",
-      category: "Vaccination Record",
-      date: "2024-10-15",
-      doctorName: "Dr. Lisa Brown",
-      hospital: "Community Health Center",
-      description: "COVID-19 booster vaccination",
-      fileType: "pdf",
-    },
-    {
-      id: 6,
-      title: "Knee Surgery Report",
-      category: "Surgery Report",
-      date: "2024-09-05",
-      doctorName: "Dr. Robert Martinez",
-      hospital: "Orthopedic Specialty Hospital",
-      description: "Arthroscopic knee surgery - meniscus repair",
-      fileType: "pdf",
-    },
-  ];
-
-  const categories = [
-    "All",
-    "Lab Results",
-    "X-Ray/Imaging",
-    "Prescription",
-    "Medical Report",
-    "Vaccination Record",
-    "Surgery Report",
-    "Discharge Summary",
-  ];
-
-  const dateFilters = [
-    "All",
-    "Last 30 days",
-    "Last 3 months",
-    "Last 6 months",
-    "Last year",
-  ];
+  
+  const {searchTerm, setSearchTerm, 
+    categoryFilter, setCategoryFilter, 
+    dateFilter, setDateFilter, 
+    selectedRecord, setSelectedRecord, 
+    openDialog, setOpenDialog, 
+    medicalRecords, 
+    categories, 
+    dateFilters} = useContext(AppContext);
 
   const getFileIcon = (fileType, category) => {
     if (fileType === "pdf" && category === "Lab Results") return <Biotech color="primary" />;
