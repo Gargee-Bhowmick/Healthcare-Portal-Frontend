@@ -168,9 +168,12 @@ export default function PatientProfile() {
 
 return (
   <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: "#f9fafb", minHeight: "100vh" }}>
-          <Typography variant="h4" fontWeight={700}>
-          Patient Profile
-        </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <Typography variant="h4" fontWeight={700} color="primary.dark">
+                Profile
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 3 }} />
     <Grid container spacing={3}>
       {/* Left column */}
       <Grid item xs={12} md={4}>

@@ -6,6 +6,7 @@ import {
   Paper,
   Typography,
   Button,
+  Divider,
   Grid,
   Card,
   CardContent,
@@ -23,6 +24,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Stack
 } from "@mui/material";
 import {
   CloudUpload,
@@ -210,9 +212,12 @@ const handleAddDetails = (file) => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
-        Upload Medical Records
-      </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <Typography variant="h4" fontWeight={700} color="primary.dark">
+                Upload Medical History
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 3 }} />
 
       <Grid container spacing={3}>
         {/* Upload Section */}

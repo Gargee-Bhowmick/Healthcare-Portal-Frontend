@@ -24,6 +24,7 @@ import {
   Divider,
   Avatar,
   Badge,
+  Stack
 } from "@mui/material";
 import {
   Search,
@@ -109,9 +110,12 @@ const MedicalHistory = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
-        Medical History
-      </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <Typography variant="h4" fontWeight={700} color="primary.dark">
+                Medical History
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 3 }} />
 
       {/* Search and Filters */}
       <Paper sx={{ p: 3, mb: 3 }}>

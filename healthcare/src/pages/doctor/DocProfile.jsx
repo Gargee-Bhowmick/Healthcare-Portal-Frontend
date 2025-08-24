@@ -37,6 +37,12 @@ export default function DocProfile() {
   const {doctor} = useContext(AppContext)
   return (
     <Box sx={{ p: { xs: 1, md: 4 }, bgcolor: "#f9fafb", minHeight: "100vh" }}>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <Typography variant="h4" fontWeight={700} color="primary.dark">
+                Profile
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 3 }} />
       <Paper elevation={3} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, mb: 3 }}>
         <Grid container spacing={3}>
           {/* Left: Photo & Basic Info */}
