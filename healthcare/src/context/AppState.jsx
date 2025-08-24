@@ -56,6 +56,8 @@ const AppState = (props) => {
         doctorName: "",
         hospital: "",
       });
+      const [records, setRecords] = useState([]);
+      const [successMessage, setSuccessMessage] = useState("");
 
   const state = {
     patients, setPatients,
@@ -87,6 +89,8 @@ const AppState = (props) => {
     isUploading, setIsUploading,
     selectedFile, setSelectedFile,
     recordDetails, setRecordDetails,
+    records, setRecords,
+    successMessage, setSuccessMessage,
 
   }
   return (

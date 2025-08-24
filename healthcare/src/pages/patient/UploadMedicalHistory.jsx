@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+
 import AppContext from "../../context/appContext";
 import {
   Box,
@@ -10,6 +11,7 @@ import {
   CardContent,
   IconButton,
   Chip,
+  Snackbar,
   Alert,
   LinearProgress,
   Dialog,
@@ -68,6 +70,8 @@ const UploadMedicalHistory = () => {
     openDialog, setOpenDialog, 
     selectedFile, setSelectedFile, 
     recordDetails, setRecordDetails, 
+    records, setRecords,
+    successMessage, setSuccessMessage,
     categories} = useContext(AppContext)
 
 
@@ -122,7 +126,7 @@ const UploadMedicalHistory = () => {
     window.open(url, "_blank");
   };
 
-  const handleAddDetails = (file) => {
+const handleAddDetails = (file) => {
     setSelectedFile(file);
     setRecordDetails({
       title: file.name.split(".")[0],
@@ -136,15 +140,33 @@ const UploadMedicalHistory = () => {
   };
 
   const handleSaveDetails = () => {
+    const fileType = selectedFile.type.includes("pdf") ? "pdf" : "image";
+    const updatedFile = {
+      ...selectedFile,
+      ...recordDetails,
+      fileType,
+      hasDetails: true,
+    };
+
+    // update files state
     setFiles((prev) =>
-      prev.map((file) =>
-        file.id === selectedFile.id
-          ? { ...file, ...recordDetails, hasDetails: true }
-          : file
-      )
+      prev.map((file) => (file.id === selectedFile.id ? updatedFile : file))
     );
+
+    // also push into records array
+    setRecords((prev) => [...prev.filter((r) => r.id !== updatedFile.id), updatedFile]);
+
     setOpenDialog(false);
     setSelectedFile(null);
+  };
+
+  const handleFinalSubmit = () => {
+    console.log("Final Submitted Records:", records);
+    // You can later send `records` to backend here
+  setFiles([]);
+  setRecords([]);
+  
+  setSuccessMessage("All records submitted successfully!");
   };
 
   const formatFileSize = (bytes) => {
@@ -183,6 +205,8 @@ const UploadMedicalHistory = () => {
       });
     }, 200);
   };
+
+
 
   return (
     <Box>
@@ -341,6 +365,20 @@ const UploadMedicalHistory = () => {
         </Grid>
       </Grid>
 
+{/* Add Submit Button */}
+      {records.length > 0 && (
+        <Box sx={{ mt: 3, textAlign: "right" }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleFinalSubmit}
+          disabled={records.length === 0}
+        >
+            Submit All Records
+          </Button>
+        </Box>
+      )}
+
       {/* Add Details Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Add Record Details</DialogTitle>
@@ -350,14 +388,18 @@ const UploadMedicalHistory = () => {
               label="Record Title"
               fullWidth
               value={recordDetails.title}
-              onChange={(e) => setRecordDetails(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) =>
+                setRecordDetails((prev) => ({ ...prev, title: e.target.value }))
+              }
             />
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
                 value={recordDetails.category}
                 label="Category"
-                onChange={(e) => setRecordDetails(prev => ({ ...prev, category: e.target.value }))}
+                onChange={(e) =>
+                  setRecordDetails((prev) => ({ ...prev, category: e.target.value }))
+                }
               >
                 {categories.map((category) => (
                   <MenuItem key={category} value={category}>
@@ -372,7 +414,9 @@ const UploadMedicalHistory = () => {
               multiline
               rows={3}
               value={recordDetails.description}
-              onChange={(e) => setRecordDetails(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setRecordDetails((prev) => ({ ...prev, description: e.target.value }))
+              }
             />
             <TextField
               label="Date"
@@ -380,19 +424,25 @@ const UploadMedicalHistory = () => {
               fullWidth
               InputLabelProps={{ shrink: true }}
               value={recordDetails.date}
-              onChange={(e) => setRecordDetails(prev => ({ ...prev, date: e.target.value }))}
+              onChange={(e) =>
+                setRecordDetails((prev) => ({ ...prev, date: e.target.value }))
+              }
             />
             <TextField
               label="Doctor Name"
               fullWidth
               value={recordDetails.doctorName}
-              onChange={(e) => setRecordDetails(prev => ({ ...prev, doctorName: e.target.value }))}
+              onChange={(e) =>
+                setRecordDetails((prev) => ({ ...prev, doctorName: e.target.value }))
+              }
             />
             <TextField
               label="Hospital/Clinic"
               fullWidth
               value={recordDetails.hospital}
-              onChange={(e) => setRecordDetails(prev => ({ ...prev, hospital: e.target.value }))}
+              onChange={(e) =>
+                setRecordDetails((prev) => ({ ...prev, hospital: e.target.value }))
+              }
             />
           </Box>
         </DialogContent>
@@ -403,7 +453,22 @@ const UploadMedicalHistory = () => {
           </Button>
         </DialogActions>
       </Dialog>
+<Snackbar
+  open={!!successMessage}
+  autoHideDuration={4000}
+  onClose={() => setSuccessMessage("")}
+  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+>
+  <Alert 
+    onClose={() => setSuccessMessage("")} 
+    severity="success" 
+    sx={{ width: "100%" }}
+  >
+    {successMessage}
+  </Alert>
+</Snackbar>
     </Box>
+    
   );
 };
 
