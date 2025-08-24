@@ -1,7 +1,7 @@
 import AppContext from './appContext'
 import {useState} from 'react'
 import {s_patients, s_doctor, s_bookings} from './sampleDoc'
-import {s_doctors, s_timeSlots,s_medicalRecords, s_categories, s_dateFilters, s_appointments} from './samplePatient'
+import {s_doctors, s_timeSlots,s_medicalRecords, s_categories, s_dateFilters, s_appointments, s_user} from './samplePatient'
 const AppState = (props) => {
   //FOR DOCTORS
   const [patients, setPatients] = useState(s_patients)
@@ -22,7 +22,6 @@ const AppState = (props) => {
       reason: "",
       notes: "",
     });
-
   
     //Medical History
     const [searchTerm, setSearchTerm] = useState("");
@@ -59,6 +58,9 @@ const AppState = (props) => {
       const [records, setRecords] = useState([]);
       const [successMessage, setSuccessMessage] = useState("");
 
+      // Profile
+      const [user, setUser] = useState(s_user);
+
   const state = {
     patients, setPatients,
     doctor, setDoctor,
@@ -91,6 +93,8 @@ const AppState = (props) => {
     recordDetails, setRecordDetails,
     records, setRecords,
     successMessage, setSuccessMessage,
+
+    user, setUser,
 
   }
   return (

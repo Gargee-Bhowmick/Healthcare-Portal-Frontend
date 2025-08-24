@@ -198,3 +198,38 @@
       appointmentType: "In-Person",
     },
   ];
+
+
+//Profile
+  export const s_user = [
+  {
+    id: 1,
+    name: "John Doe",
+    gender: "Male",
+    age: 42,
+    contact: "+1-555-123456",
+    emergencyContact: "+1-555-987654",
+    chiefComplaint: "Chest pain and shortness of breath",
+    symptoms: "Fatigue, dizziness, occasional headache",
+    insurance: "BlueCross Health Insurance",
+    familyHistory: "Father: Hypertension, Mother: Diabetes",
+    lifestyle: "Non-smoker, occasional alcohol, sedentary job",
+    photo: "https://randomuser.me/api/portraits/men/32.jpg", // placeholder image
+    allergies: ["Penicillin", "Dust"],
+    chronic: ["Hypertension"],
+    surgeries: ["Appendectomy (2005)"],
+    medications: [
+      { name: "Amlodipine", dosage: "5mg", frequency: "Once daily" },
+      { name: "Metformin", dosage: "500mg", frequency: "Twice daily" },
+    ],
+    vitals: {
+      temperature: "98.6",
+      bp: "130/85",
+      heartRate: "78",
+      respRate: "16",
+      spo2: "97",
+      weight: "82",
+      height: "175",
+    },
+  },
+];

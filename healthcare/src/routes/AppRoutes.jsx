@@ -37,7 +37,7 @@ export default function AppRoutes() {
       {/* Protected Patient Routes */}
       {/* <Route element={<ProtectedRoute allowedRoles={["patient"]} />}> */}
         <Route path="/patient" element={<PatientLayout />}>
-          <Route index element={<BookAppointment />} />
+          <Route index element={<Profile />} />
           <Route path="book-appointment" element={<BookAppointment />} />
           <Route path="doctor-profile" element={<DoctorProfile />} />
           <Route path="doctors-list" element={<DoctorsList />} />
@@ -51,7 +51,7 @@ export default function AppRoutes() {
       {/* Protected Doctor Routes */}
       {/* <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}> */}
         <Route path="/doctor" element={<DoctorLayout />}>
-          <Route index element={<PatientDetails />} />
+          <Route index element={<DocProfile />} />
           <Route path="patient-details/:id?" element={<PatientDetails />} />
           <Route path="timetable" element={<Timetable />} />
           <Route path="profile" element={<DocProfile />} />
