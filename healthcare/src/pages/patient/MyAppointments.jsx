@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
+import AppContext from "../../context/appContext";
 import {
   Box,
   Card,
@@ -26,81 +27,7 @@ import {
 } from "react-icons/fa";
 
 const MyAppointments = () => {
-  const [tabValue, setTabValue] = useState(0);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-
-  // Mock appointments data
-  const appointments = [
-    {
-      id: 1,
-      doctor: {
-        name: "Dr. Sarah Johnson",
-        specialty: "Cardiologist",
-        avatar: "/api/placeholder/60/60",
-        phone: "+1 (555) 123-4567",
-        email: "sarah.johnson@hospital.com",
-      },
-      date: "2025-08-20",
-      time: "10:30 AM",
-      status: "confirmed",
-      reason: "Routine Checkup",
-      location: "Room 205, Cardiology Wing",
-      notes: "Regular heart checkup and blood pressure monitoring",
-      appointmentType: "In-Person",
-    },
-    {
-      id: 2,
-      doctor: {
-        name: "Dr. Michael Brown",
-        specialty: "Dermatologist",
-        avatar: "/api/placeholder/60/60",
-        phone: "+1 (555) 234-5678",
-        email: "michael.brown@hospital.com",
-      },
-      date: "2025-08-22",
-      time: "02:15 PM",
-      status: "pending",
-      reason: "Skin Consultation",
-      location: "Room 301, Dermatology Department",
-      notes: "Follow-up for skin condition treatment",
-      appointmentType: "In-Person",
-    },
-    {
-      id: 3,
-      doctor: {
-        name: "Dr. Emily Davis",
-        specialty: "Neurologist",
-        avatar: "/api/placeholder/60/60",
-        phone: "+1 (555) 345-6789",
-        email: "emily.davis@hospital.com",
-      },
-      date: "2025-08-18",
-      time: "09:00 AM",
-      status: "completed",
-      reason: "Headache Consultation",
-      location: "Room 105, Neurology Wing",
-      notes: "Discussed migraine treatment options",
-      appointmentType: "In-Person",
-    },
-    {
-      id: 4,
-      doctor: {
-        name: "Dr. James Wilson",
-        specialty: "Orthopedist",
-        avatar: "/api/placeholder/60/60",
-        phone: "+1 (555) 456-7890",
-        email: "james.wilson@hospital.com",
-      },
-      date: "2025-08-15",
-      time: "11:45 AM",
-      status: "cancelled",
-      reason: "Knee Pain",
-      location: "Room 402, Orthopedics Department",
-      notes: "Patient cancelled due to scheduling conflict",
-      appointmentType: "In-Person",
-    },
-  ];
+  const {tabValue, setTabValue, selectedAppointment, setSelectedAppointment, appointments, openDialog, setOpenDialog} = useContext(AppContext);
 
   const getStatusColor = (status) => {
     switch (status) {

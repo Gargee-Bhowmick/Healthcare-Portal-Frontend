@@ -1,15 +1,15 @@
 import AppContext from './appContext'
 import {useState} from 'react'
 import {s_patients, s_doctor, s_bookings} from './sampleDoc'
-import {s_doctors, s_timeSlots,s_medicalRecords, s_categories, s_dateFilters} from './samplePatient'
+import {s_doctors, s_timeSlots,s_medicalRecords, s_categories, s_dateFilters, s_appointments} from './samplePatient'
 const AppState = (props) => {
-  //for doctors
+  //FOR DOCTORS
   const [patients, setPatients] = useState(s_patients)
   const [doctor, setDoctor] = useState(s_doctor)
   const [bookings, setBookings] = useState(s_bookings)
 
 
- // for patients
+ // FOR PATIENTS
 
   //Book Appointments
   const [doctors, setDoctors] = useState(s_doctors)
@@ -34,6 +34,29 @@ const AppState = (props) => {
     const [categories, setCategories] = useState(s_categories)
     const [dateFilters, setDateFilters] = useState(s_dateFilters)
 
+
+    // My Appointments
+    const [appointments, setAppointments] = useState(s_appointments)
+    const [tabValue, setTabValue] = useState(0);
+    // const [openDialog, setOpenDialog] = useState(false);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+
+    //Upload Medical History
+      const [files, setFiles] = useState([]);
+      const [isDragOver, setIsDragOver] = useState(false);
+      const [uploadProgress, setUploadProgress] = useState(0);
+      const [isUploading, setIsUploading] = useState(false);
+      const [selectedFile, setSelectedFile] = useState(null);
+      const [recordDetails, setRecordDetails] = useState({
+        title: "",
+        category: "",
+        description: "",
+        date: "",
+        doctorName: "",
+        hospital: "",
+      });
+
   const state = {
     patients, setPatients,
     doctor, setDoctor,
@@ -53,6 +76,17 @@ const AppState = (props) => {
     medicalRecords, setMedicalRecords,
     categories, setCategories,
     dateFilters, setDateFilters,
+
+    appointments, setAppointments,
+    tabValue, setTabValue,
+    selectedAppointment, setSelectedAppointment,
+
+    files, setFiles,
+    isDragOver, setIsDragOver,
+    uploadProgress, setUploadProgress,
+    isUploading, setIsUploading,
+    selectedFile, setSelectedFile,
+    recordDetails, setRecordDetails,
 
   }
   return (

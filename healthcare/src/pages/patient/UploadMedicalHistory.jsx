@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
+import AppContext from "../../context/appContext";
 import {
   Box,
   Paper,
@@ -60,31 +61,15 @@ const DropZone = styled(Box)(({ theme, isDragOver }) => ({
 }));
 
 const UploadMedicalHistory = () => {
-  const [files, setFiles] = useState([]);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [recordDetails, setRecordDetails] = useState({
-    title: "",
-    category: "",
-    description: "",
-    date: "",
-    doctorName: "",
-    hospital: "",
-  });
+  const {files, setFiles, 
+    isDragOver, setIsDragOver, 
+    uploadProgress, setUploadProgress, 
+    isUploading, setIsUploading, 
+    openDialog, setOpenDialog, 
+    selectedFile, setSelectedFile, 
+    recordDetails, setRecordDetails, 
+    categories} = useContext(AppContext)
 
-  const categories = [
-    "Lab Results",
-    "X-Ray/Imaging",
-    "Prescription",
-    "Medical Report",
-    "Vaccination Record",
-    "Surgery Report",
-    "Discharge Summary",
-    "Other",
-  ];
 
   const handleFileSelect = (event) => {
     const selectedFiles = Array.from(event.target.files);
