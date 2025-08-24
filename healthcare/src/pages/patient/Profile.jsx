@@ -33,14 +33,14 @@ function getBMI(weight, height) {
 }
 
 export default function PatientProfile() {
-  const { patients, setPatients } = useContext(AppContext);
+  const { user, setUser } = useContext(AppContext);
   const { id } = useParams();
   const navigate = useNavigate();
 
   const patientFromStore = useMemo(() => {
-    const pid = Number(id) || (patients && patients[0]?.id);
-    return patients?.find((p) => p.id === pid) || null;
-  }, [patients, id]);
+    const pid = Number(id) || (user && user[0]?.id);
+    return user?.find((p) => p.id === pid) || null;
+  }, [user, id]);
 
   const [form, setForm] = useState(() => ({
     id: patientFromStore?.id || null,
@@ -144,8 +144,8 @@ export default function PatientProfile() {
       });
       if (!res.ok) throw new Error("Failed to update patient");
 
-      if (setPatients) {
-        setPatients((prev) =>
+      if (setUser) {
+        setUser((prev) =>
           prev.map((p) => (p.id === form.id ? { ...p, ...form } : p))
         );
       }
