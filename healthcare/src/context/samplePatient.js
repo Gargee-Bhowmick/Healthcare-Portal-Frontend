@@ -107,6 +107,8 @@
     },
   ];
 
+
+// Frontend specific
   export const s_categories = [
     "All",
     "Lab Results",
@@ -117,7 +119,7 @@
     "Surgery Report",
     "Discharge Summary",
   ];
-
+// Frontend specific
   export const s_dateFilters = [
     "All",
     "Last 30 days",

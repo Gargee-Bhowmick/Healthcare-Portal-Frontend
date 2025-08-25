@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-
+  
 // Patient Pages
 import BookAppointment from "../pages/patient/BookAppointment";
 import DoctorProfile from "../pages/patient/DoctorProfile";
