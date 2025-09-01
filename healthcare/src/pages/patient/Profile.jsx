@@ -23,7 +23,6 @@ import {
   Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 function getBMI(weight, height) {
@@ -48,17 +47,10 @@ export default function PatientProfile() {
     gender: patientFromStore?.gender || "",
     age: patientFromStore?.age || "",
     contact: patientFromStore?.contact || "",
-    emergencyContact: patientFromStore?.emergencyContact || "",
-    chiefComplaint: patientFromStore?.chiefComplaint || "",
-    symptoms: patientFromStore?.symptoms || "",
-    insurance: patientFromStore?.insurance || "",
-    familyHistory: patientFromStore?.familyHistory || "",
-    lifestyle: patientFromStore?.lifestyle || "",
     photo: patientFromStore?.photo || "",
     allergies: patientFromStore?.allergies || [],
     chronic: patientFromStore?.chronic || [],
     surgeries: patientFromStore?.surgeries || [],
-    medications: patientFromStore?.medications || [], // [{name,dosage,frequency}]
     vitals: {
       temperature: patientFromStore?.vitals?.temperature || "",
       bp: patientFromStore?.vitals?.bp || "",
@@ -73,7 +65,6 @@ export default function PatientProfile() {
   const [newAllergy, setNewAllergy] = useState("");
   const [newChronic, setNewChronic] = useState("");
   const [newSurgery, setNewSurgery] = useState("");
-  const [newMed, setNewMed] = useState({ name: "", dosage: "", frequency: "" });
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
 
   useEffect(() => {
@@ -85,17 +76,10 @@ export default function PatientProfile() {
       gender: patientFromStore.gender || "",
       age: patientFromStore.age || "",
       contact: patientFromStore.contact || "",
-      emergencyContact: patientFromStore.emergencyContact || "",
-      chiefComplaint: patientFromStore.chiefComplaint || "",
-      symptoms: patientFromStore.symptoms || "",
-      insurance: patientFromStore.insurance || "",
-      familyHistory: patientFromStore.familyHistory || "",
-      lifestyle: patientFromStore.lifestyle || "",
       photo: patientFromStore.photo || "",
       allergies: patientFromStore.allergies || [],
       chronic: patientFromStore.chronic || [],
       surgeries: patientFromStore.surgeries || [],
-      medications: patientFromStore.medications || [],
       vitals: {
         temperature: patientFromStore?.vitals?.temperature || "",
         bp: patientFromStore?.vitals?.bp || "",
@@ -118,14 +102,6 @@ export default function PatientProfile() {
   };
   const removeFromArray = (key, idx) =>
     setForm((f) => ({ ...f, [key]: f[key].filter((_, i) => i !== idx) }));
-
-  const addMedication = () => {
-    if (!newMed.name.trim()) return;
-    setForm((f) => ({ ...f, medications: [...f.medications, { ...newMed }] }));
-    setNewMed({ name: "", dosage: "", frequency: "" });
-  };
-  const removeMedication = (idx) =>
-    setForm((f) => ({ ...f, medications: f.medications.filter((_, i) => i !== idx) }));
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -229,38 +205,7 @@ return (
                 onChange={(e) => handleField("contact", e.target.value)}
                 fullWidth
               />
-              <TextField
-                label="Emergency Contact"
-                value={form.emergencyContact}
-                onChange={(e) => handleField("emergencyContact", e.target.value)}
-                fullWidth
-              />
             </Stack>
-          </CardContent>
-        </Card>
-
-        <Card elevation={2} sx={{ borderRadius: 3, mt: 2 }}>
-          <CardContent>
-            <Typography variant="h6" fontWeight={700} gutterBottom>
-              Medical Overview
-            </Typography>
-            <TextField
-              label="Chief Complaint"
-              value={form.chiefComplaint}
-              onChange={(e) => handleField("chiefComplaint", e.target.value)}
-              fullWidth
-              multiline
-              minRows={2}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Symptoms"
-              value={form.symptoms}
-              onChange={(e) => handleField("symptoms", e.target.value)}
-              fullWidth
-              multiline
-              minRows={2}
-            />
           </CardContent>
         </Card>
       </Grid>
@@ -471,137 +416,9 @@ return (
               </CardContent>
             </Card>
           </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Card elevation={2} sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Family & Social History
-                </Typography>
-                <TextField
-                  label="Father’s Medical History"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                  value={form.fatherHistory}
-                  onChange={(e) => handleField("fatherHistory", e.target.value)}
-                />
-                <TextField
-                  label="Mother’s Medical History"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                  value={form.motherHistory}
-                  onChange={(e) => handleField("motherHistory", e.target.value)}
-                />
-                <TextField
-                  label="Insurance"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                  value={form.insurance}
-                  onChange={(e) => handleField("insurance", e.target.value)}
-                />
-                <TextField
-                  label="Lifestyle / Social History"
-                  fullWidth
-                  value={form.lifestyle}
-                  onChange={(e) => handleField("lifestyle", e.target.value)}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
         </Grid>
 
         <Card elevation={2} sx={{ borderRadius: 3, mt: 2 }}>
-          <CardContent>
-            <Typography variant="h6" fontWeight={700} gutterBottom>
-              Medications
-            </Typography>
-            <Grid container spacing={1} sx={{ mb: 2 }}>
-              {form.medications.map((m, idx) => (
-                <Grid item xs={12} key={`${m.name}-${idx}`}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <TextField
-                      label="Name"
-                      size="small"
-                      value={m.name}
-                      onChange={(e) =>
-                        setForm((f) => {
-                          const meds = [...f.medications];
-                          meds[idx] = { ...meds[idx], name: e.target.value };
-                          return { ...f, medications: meds };
-                        })
-                      }
-                      sx={{ minWidth: 200 }}
-                    />
-                    <TextField
-                      label="Dosage"
-                      size="small"
-                      value={m.dosage}
-                      onChange={(e) =>
-                        setForm((f) => {
-                          const meds = [...f.medications];
-                          meds[idx] = { ...meds[idx], dosage: e.target.value };
-                          return { ...f, medications: meds };
-                        })
-                      }
-                      sx={{ minWidth: 160 }}
-                    />
-                    <TextField
-                      label="Frequency"
-                      size="small"
-                      value={m.frequency}
-                      onChange={(e) =>
-                        setForm((f) => {
-                          const meds = [...f.medications];
-                          meds[idx] = { ...meds[idx], frequency: e.target.value };
-                          return { ...f, medications: meds };
-                        })
-                      }
-                      sx={{ minWidth: 160 }}
-                    />
-                    <IconButton color="error" onClick={() => removeMedication(idx)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                </Grid>
-              ))}
-            </Grid>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-              <TextField
-                label="Name"
-                size="small"
-                value={newMed.name}
-                onChange={(e) =>
-                  setNewMed((nm) => ({ ...nm, name: e.target.value }))
-                }
-                sx={{ minWidth: 200 }}
-              />
-              <TextField
-                label="Dosage"
-                size="small"
-                value={newMed.dosage}
-                onChange={(e) =>
-                  setNewMed((nm) => ({ ...nm, dosage: e.target.value }))
-                }
-                sx={{ minWidth: 160 }}
-              />
-              <TextField
-                label="Frequency"
-                size="small"
-                value={newMed.frequency}
-                onChange={(e) =>
-                  setNewMed((nm) => ({ ...nm, frequency: e.target.value }))
-                }
-                sx={{ minWidth: 160 }}
-              />
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={addMedication}
-              >
-                Add
-              </Button>
-            </Stack>
-          </CardContent>
           <CardActions sx={{ justifyContent: "flex-end" }}>
             <Button variant="contained" onClick={handleSubmit}>
               Save Changes
