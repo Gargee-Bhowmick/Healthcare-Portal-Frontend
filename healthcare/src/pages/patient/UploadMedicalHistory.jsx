@@ -1,480 +1,219 @@
-import React, { useContext } from "react";
-
-import AppContext from "../../context/appContext";
+import React, { useState } from "react";
 import {
   Box,
-  Paper,
   Typography,
-  Button,
-  Divider,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Chip,
-  Snackbar,
-  Alert,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Stack
+  Button,
+  Card,
+  CardContent,
+  LinearProgress,
+  Alert,
+  Grid,
 } from "@mui/material";
-import {
-  CloudUpload,
-  Delete,
-  Visibility,
-  Description,
-  LocalHospital,
-  Assignment,
-  Add,
-} from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
 
-// Styled components
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
+const UploadMedicalRecords = () => {
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "",
+    date: "",
+    doctorName: "",
+    hospital: "",
+    description: "",
+  });
 
-const DropZone = styled(Box)(({ theme, isDragOver }) => ({
-  border: `2px dashed ${isDragOver ? theme.palette.primary.main : theme.palette.grey[300]}`,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(4),
-  textAlign: "center",
-  backgroundColor: isDragOver ? theme.palette.primary.light + "10" : theme.palette.grey[50],
-  cursor: "pointer",
-  transition: "all 0.3s ease",
-  "&:hover": {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.light + "10",
-  },
-}));
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [errors, setErrors] = useState({});
 
-const UploadMedicalHistory = () => {
-  const {files, setFiles, 
-    isDragOver, setIsDragOver, 
-    uploadProgress, setUploadProgress, 
-    isUploading, setIsUploading, 
-    openDialog, setOpenDialog, 
-    selectedFile, setSelectedFile, 
-    recordDetails, setRecordDetails, 
-    records, setRecords,
-    successMessage, setSuccessMessage,
-    categories} = useContext(AppContext)
+  const categories = [
+    "Lab Results",
+    "X-Ray/Imaging",
+    "Prescription",
+    "Medical Report",
+    "Vaccination Record",
+    "Surgery Report",
+    "Discharge Summary",
+  ];
 
-
-  const handleFileSelect = (event) => {
-    const selectedFiles = Array.from(event.target.files);
-    processFiles(selectedFiles);
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    setIsDragOver(true);
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.category) newErrors.category = "Category is required";
+    if (!formData.date) newErrors.date = "Date is required";
+    if (!formData.doctorName.trim()) newErrors.doctorName = "Doctor name is required";
+    if (!formData.hospital.trim()) newErrors.hospital = "Hospital/Clinic is required";
+    if (!formData.description.trim()) newErrors.description = "Description is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setIsDragOver(false);
-    const droppedFiles = Array.from(event.dataTransfer.files);
-    processFiles(droppedFiles);
-  };
-
-  const processFiles = (newFiles) => {
-    const validFiles = newFiles.filter((file) => {
-      const validTypes = ["image/jpeg", "image/png", "application/pdf", "image/jpg"];
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      return validTypes.includes(file.type) && file.size <= maxSize;
-    });
-
-    const filesWithId = validFiles.map((file) => ({
-      id: Date.now() + Math.random(),
-      file,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      uploadStatus: "pending",
-      category: "",
-      description: "",
-    }));
-
-    setFiles((prev) => [...prev, ...filesWithId]);
-  };
-
-  const handleRemoveFile = (fileId) => {
-    setFiles((prev) => prev.filter((file) => file.id !== fileId));
-  };
-
-  const handleViewFile = (file) => {
-    const url = URL.createObjectURL(file.file);
-    window.open(url, "_blank");
-  };
-
-const handleAddDetails = (file) => {
-    setSelectedFile(file);
-    setRecordDetails({
-      title: file.name.split(".")[0],
-      category: "",
-      description: "",
-      date: new Date().toISOString().split("T")[0],
-      doctorName: "",
-      hospital: "",
-    });
-    setOpenDialog(true);
-  };
-
-  const handleSaveDetails = () => {
-    const fileType = selectedFile.type.includes("pdf") ? "pdf" : "image";
-    const updatedFile = {
-      ...selectedFile,
-      ...recordDetails,
-      fileType,
-      hasDetails: true,
-    };
-
-    // update files state
-    setFiles((prev) =>
-      prev.map((file) => (file.id === selectedFile.id ? updatedFile : file))
-    );
-
-    // also push into records array
-    setRecords((prev) => [...prev.filter((r) => r.id !== updatedFile.id), updatedFile]);
-
-    setOpenDialog(false);
-    setSelectedFile(null);
-  };
-
-  const handleFinalSubmit = () => {
-    console.log("Final Submitted Records:", records);
-    // You can later send `records` to backend here
-  setFiles([]);
-  setRecords([]);
-  
-  setSuccessMessage("All records submitted successfully!");
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const getFileIcon = (fileType) => {
-    if (fileType.includes("pdf")) return <Description color="error" />;
-    if (fileType.includes("image")) return <LocalHospital color="primary" />;
-    return <Assignment color="action" />;
-  };
-
-  const handleUpload = async () => {
-    if (files.length === 0) return;
-
-    setIsUploading(true);
+    setUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
+    const progressInterval = setInterval(() => {
       setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          // Update file status to uploaded
-          setFiles((prev) =>
-            prev.map((file) => ({ ...file, uploadStatus: "uploaded" }))
-          );
-          return 100;
+        if (prev >= 95) {
+          clearInterval(progressInterval);
+          return 95;
         }
-        return prev + 10;
+        return prev + Math.random() * 15;
       });
     }, 200);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setUploadProgress(100);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setFormData({ title: "", category: "", date: "", doctorName: "", hospital: "", description: "" });
+        setUploading(false);
+        setUploadProgress(0);
+        setShowSuccess(false);
+      }, 3000);
+    } catch (error) {
+      setUploading(false);
+    }
   };
 
-
-
   return (
-    <Box>
-            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-              <Typography variant="h4" fontWeight={700} color="primary.dark">
-                Upload Medical History
-              </Typography>
-            </Stack>
-            <Divider sx={{ mb: 3 }} />
+    <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: "#1976d2", mb: 1 }}>
+          Upload Medical Records
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Add new medical records to your health history
+        </Typography>
+      </Box>
 
-      <Grid container spacing={3}>
-        {/* Upload Section */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-              Add New Records
-            </Typography>
-
-            <DropZone
-              isDragOver={isDragOver}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => document.getElementById("file-input").click()}
-            >
-              <CloudUpload sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Drag & drop files here or click to browse
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Supported formats: PDF, JPG, PNG (Max 10MB each)
-              </Typography>
-              <Button
-                component="label"
-                variant="contained"
-                startIcon={<CloudUpload />}
-                sx={{ mt: 2 }}
-              >
-                Choose Files
-                <VisuallyHiddenInput
-                  id="file-input"
-                  type="file"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleFileSelect}
-                />
-              </Button>
-            </DropZone>
-
-            {isUploading && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" gutterBottom>
-                  Uploading files... {uploadProgress}%
-                </Typography>
-                <LinearProgress variant="determinate" value={uploadProgress} />
-              </Box>
-            )}
-          </Paper>
-
-          {/* Files List */}
-          {files.length > 0 && (
-            <Paper sx={{ p: 3 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="h6">
-                  Selected Files ({files.length})
-                </Typography>
-                <Button
-                  variant="contained"
-                  onClick={handleUpload}
-                  disabled={isUploading || files.length === 0}
-                  startIcon={<CloudUpload />}
-                >
-                  Upload All
-                </Button>
-              </Box>
-
-              <Grid container spacing={2}>
-                {files.map((fileItem) => (
-                  <Grid item xs={12} key={fileItem.id}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          {getFileIcon(fileItem.type)}
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle2" noWrap>
-                              {fileItem.name}
-                            </Typography>
-                            <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                              <Chip
-                                size="small"
-                                label={formatFileSize(fileItem.size)}
-                                variant="outlined"
-                              />
-                              {fileItem.category && (
-                                <Chip
-                                  size="small"
-                                  label={fileItem.category}
-                                  color="primary"
-                                  variant="outlined"
-                                />
-                              )}
-                              <Chip
-                                size="small"
-                                label={fileItem.uploadStatus}
-                                color={fileItem.uploadStatus === "uploaded" ? "success" : "default"}
-                                variant="outlined"
-                              />
-                            </Box>
-                          </Box>
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleViewFile(fileItem)}
-                              color="primary"
-                            >
-                              <Visibility />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleAddDetails(fileItem)}
-                              color="info"
-                            >
-                              <Add />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleRemoveFile(fileItem.id)}
-                              color="error"
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-          )}
-        </Grid>
-
-        {/* Information Panel */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Upload Guidelines
-            </Typography>
-            <Alert severity="info">
-              <Typography variant="body2">
-                • Supported formats: PDF, JPG, PNG
-                <br />
-                • Maximum file size: 10MB per file
-                <br />
-                • Add descriptions for better organization
-              </Typography>
-            </Alert>
-          </Paper>
-        </Grid>
-      </Grid>
-
-{/* Add Submit Button */}
-      {records.length > 0 && (
-        <Box sx={{ mt: 3, textAlign: "right" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleFinalSubmit}
-          disabled={records.length === 0}
-        >
-            Submit All Records
-          </Button>
-        </Box>
+      {showSuccess && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          Medical record uploaded successfully!
+        </Alert>
       )}
 
-      {/* Add Details Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Record Details</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <TextField
-              label="Record Title"
-              fullWidth
-              value={recordDetails.title}
-              onChange={(e) =>
-                setRecordDetails((prev) => ({ ...prev, title: e.target.value }))
-              }
-            />
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={recordDetails.category}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Basic Information</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Title"
+                fullWidth
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                error={!!errors.title}
+                helperText={errors.title}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                select
                 label="Category"
-                onChange={(e) =>
-                  setRecordDetails((prev) => ({ ...prev, category: e.target.value }))
-                }
+                fullWidth
+                value={formData.category}
+                onChange={(e) => handleInputChange("category", e.target.value)}
+                error={!!errors.category}
+                helperText={errors.category}
               >
-                {categories.map((category) => (
-                  <MenuItem key={category} value={category}>
-                    {category}
-                  </MenuItem>
+                {categories.map((c) => (
+                  <MenuItem key={c} value={c}>{c}</MenuItem>
                 ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Description"
-              fullWidth
-              multiline
-              rows={3}
-              value={recordDetails.description}
-              onChange={(e) =>
-                setRecordDetails((prev) => ({ ...prev, description: e.target.value }))
-              }
-            />
-            <TextField
-              label="Date"
-              type="date"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              value={recordDetails.date}
-              onChange={(e) =>
-                setRecordDetails((prev) => ({ ...prev, date: e.target.value }))
-              }
-            />
-            <TextField
-              label="Doctor Name"
-              fullWidth
-              value={recordDetails.doctorName}
-              onChange={(e) =>
-                setRecordDetails((prev) => ({ ...prev, doctorName: e.target.value }))
-              }
-            />
-            <TextField
-              label="Hospital/Clinic"
-              fullWidth
-              value={recordDetails.hospital}
-              onChange={(e) =>
-                setRecordDetails((prev) => ({ ...prev, hospital: e.target.value }))
-              }
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleSaveDetails} variant="contained">
-            Save Details
-          </Button>
-        </DialogActions>
-      </Dialog>
-<Snackbar
-  open={!!successMessage}
-  autoHideDuration={4000}
-  onClose={() => setSuccessMessage("")}
-  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
->
-  <Alert 
-    onClose={() => setSuccessMessage("")} 
-    severity="success" 
-    sx={{ width: "100%" }}
-  >
-    {successMessage}
-  </Alert>
-</Snackbar>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                type="date"
+                label="Date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={formData.date}
+                onChange={(e) => handleInputChange("date", e.target.value)}
+                error={!!errors.date}
+                helperText={errors.date}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                fullWidth
+                multiline
+                rows={3}
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                error={!!errors.description}
+                helperText={errors.description}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Healthcare Provider</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Doctor Name"
+                fullWidth
+                value={formData.doctorName}
+                onChange={(e) => handleInputChange("doctorName", e.target.value)}
+                error={!!errors.doctorName}
+                helperText={errors.doctorName}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Hospital/Clinic"
+                fullWidth
+                value={formData.hospital}
+                onChange={(e) => handleInputChange("hospital", e.target.value)}
+                error={!!errors.hospital}
+                helperText={errors.hospital}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {uploading && (
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography gutterBottom>Uploading Medical Record...</Typography>
+            <LinearProgress variant="determinate" value={uploadProgress} />
+            <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+              {Math.round(uploadProgress)}% Complete
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
+
+      <Box display="flex" justifyContent="flex-end" gap={2}>
+        <Button onClick={() => setFormData({ title: "", category: "", date: "", doctorName: "", hospital: "", description: "" })} disabled={uploading}>
+          Reset
+        </Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={uploading}>
+          {uploading ? "Uploading..." : "Upload Record"}
+        </Button>
+      </Box>
+
+      
     </Box>
-    
   );
 };
 
-export default UploadMedicalHistory;
+export default UploadMedicalRecords;
