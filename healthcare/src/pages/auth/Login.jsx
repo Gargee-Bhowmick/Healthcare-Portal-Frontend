@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { loginUser } from "../../services/authService";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Box,

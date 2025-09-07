@@ -52,7 +52,6 @@ const PatientRegister = () => {
       return setError("Please enter a valid phone number (digits only).");
     }
 
-<<<<<<< Updated upstream
     try {
       await authService.register({
         username,
@@ -66,14 +65,6 @@ const PatientRegister = () => {
     } catch (err) {
       setError(err.response?.data?.detail || err.message || "Registration failed");
     }
-=======
-  try {
-    await registerUser({ username , email, password, role: "patient", ph_number: phone });
-    // Redirect to login or show success
-  } catch (err) {
-    setError(err.message);
-  }
->>>>>>> Stashed changes
   };
 
   const strength = getPasswordStrength(password);
