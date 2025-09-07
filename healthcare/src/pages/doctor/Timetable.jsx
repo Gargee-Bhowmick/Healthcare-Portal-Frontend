@@ -1,5 +1,4 @@
-import {useContext} from 'react'
-import AppContext from '../../context/appContext'
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -19,6 +18,10 @@ import {
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import PersonIcon from "@mui/icons-material/Person";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import appointmentService from "../../services/appointmentService"; // add this
+import useLoading from "../../components/Provider/useLoading"; // import hook
+
 
 // Generate 30-min slots for 9 hours (8:00 to 16:30)
 const timeSlots = [];
@@ -30,13 +33,67 @@ for (let h = 8; h < 17; h++) {
   }
 }
 
+// Weekdays
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
+// Get start of current week (Monday)
+const getWeekStart = () => dayjs().startOf("week").add(1, "day");
 
 const Timetable = () => {
+  const { loading, setLoading } = useLoading(); 
   const theme = useTheme();
   const navigate = useNavigate();
-  const {bookings} = useContext(AppContext);
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState(null);
+
+  // Fetch appointments from backend
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setLoading(true);
+      setError(null);
+      const doctorId = localStorage.getItem("user_id");
+      if (!doctorId) {
+        console.log("doctor ID not found")
+        return;
+      }
+      try {
+        const response = await appointmentService.getByDoctor(doctorId); 
+        setAppointments(response.data); // assuming axios response
+        console.log("Fetched appointments:", response.data);
+      } catch (err) {
+        setError("Failed to fetch appointments",err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  // Process bookings for this week
+  const weeklyBookings = useMemo(() => {
+    const weekStart = getWeekStart();
+    const weekDaysMap = {};
+    days.forEach((day) => (weekDaysMap[day] = {}));
+
+    appointments.forEach((b) => {
+      const date = dayjs(b.appointment_date);
+      const dayOfWeek = date.format("dddd");
+      if (date.isAfter(weekStart.subtract(1, "day")) && date.isBefore(weekStart.add(5, "day"))) {
+        const slot = dayjs(b.appointment_time, "HH:mm:ss.SSSZ").format("HH:mm");
+        weekDaysMap[dayOfWeek][slot] = {
+          patientName: b.patient_name || "Patient",
+          patientId: b.patient_id,
+        };
+      }
+    });
+
+    return weekDaysMap;
+  }, [appointments]);
+
+  if (loading) return <Typography>Loading timetable...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
+
   return (
     <Box
       sx={{
@@ -81,9 +138,7 @@ const Timetable = () => {
         >
           <TableHead>
             <TableRow>
-              <TableCell sx={{ width: 90, fontWeight: 700, fontSize: 15 }}>
-                Time
-              </TableCell>
+              <TableCell sx={{ width: 90, fontWeight: 700, fontSize: 15 }}>Time</TableCell>
               {days.map((day) => (
                 <TableCell key={day} align="center" sx={{ fontWeight: 700, fontSize: 15 }}>
                   {day}
@@ -101,11 +156,9 @@ const Timetable = () => {
                   transition: "background 0.2s",
                 }}
               >
-                <TableCell sx={{ fontWeight: 600, color: "#1976d2" }}>
-                  {slot}
-                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#1976d2" }}>{slot}</TableCell>
                 {days.map((day) => {
-                  const booking = bookings[day]?.[slot];
+                  const booking = weeklyBookings[day]?.[slot];
                   return (
                     <TableCell
                       key={day + slot}
@@ -115,9 +168,6 @@ const Timetable = () => {
                         p: 0.5,
                         minWidth: 120,
                         borderBottom: "1px solid #f0f0f0",
-                        borderLeft: "none",
-                        borderRight: "none",
-                        borderTop: "none",
                         transition: "background 0.2s",
                       }}
                     >
@@ -137,7 +187,6 @@ const Timetable = () => {
                               py: 0.5,
                               borderRadius: 2,
                               background: "rgba(33,150,243,0.08)",
-                              transition: "background 0.2s",
                               "&:hover": {
                                 background: "rgba(33,150,243,0.18)",
                                 textDecoration: "underline",
@@ -170,15 +219,11 @@ const Timetable = () => {
           </TableBody>
         </Table>
       </Paper>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ mt: 2, display: "block", textAlign: "right" }}
-      >
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block", textAlign: "right" }}>
         * Click on a patient name to view their profile.
       </Typography>
     </Box>
-    );
-    };
+  );
+};
 
-    export default Timetable;
+export default Timetable;

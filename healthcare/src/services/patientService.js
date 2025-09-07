@@ -6,7 +6,7 @@ const patientService = {
 
   create: (data) => apiClient.post("/patients/createPatient", data),
 
-  getById: (patientId) => apiClient.get(`/patients/${patientId}`),
+  getByIdPatient: (patientId) => apiClient.get(`/patients/${patientId}`),
 
   uploadMedicalRecord: (patientId, recordData) => {
     const formData = new FormData();
