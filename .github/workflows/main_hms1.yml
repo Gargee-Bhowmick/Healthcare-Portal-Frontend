@@ -62,4 +62,5 @@ jobs:
         with:
           app-name: 'hms1'
           slot-name: 'Production'
-          package: ./dist
+          package: dist
+
