@@ -59,4 +59,5 @@ jobs:
         with:
           app-name: 'hms1'
           slot-name: 'Production'
-          package: ./node-app
+          package: ./healthcare/dist
+
