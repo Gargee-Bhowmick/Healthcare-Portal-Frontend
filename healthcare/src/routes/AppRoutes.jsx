@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "../components/Provider/ProtectedRoute";
-import { AuthProvider } from "../components/Provider/AuthProvider";
 
 // Patient Pages
 import BookAppointment from "../pages/patient/BookAppointment";
@@ -26,7 +25,6 @@ import DoctorLayout from "../layouts/DoctorLayout";
 
 export default function AppRoutes() {
   return (
-    <AuthProvider>
       <Routes>
         {/* Default route redirects to login */}
         <Route path="/" element={<Navigate to="/login" />} />
@@ -59,6 +57,5 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Routes>
-    </AuthProvider>
   );
 }

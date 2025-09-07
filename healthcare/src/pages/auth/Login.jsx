@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import useLoading from "../../components/Provider/useLoading";
 import {
   Box,
   Button,
@@ -13,6 +14,7 @@ import {
 import authService from "../../services/authService"; // <-- use the service we defined
 
 const Login = () => {
+  const { setLoading } = useLoading();
   const [username, setUsername] = useState(""); // backend expects username, not email
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +23,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+    setLoading(true);
     try {
       const data = await authService.login({ username, password });
 
@@ -37,6 +39,8 @@ const Login = () => {
       }
     } catch (err) {
       setError("Invalid username or password", err);
+    } finally{
+      setLoading(false);
     }
   };
 

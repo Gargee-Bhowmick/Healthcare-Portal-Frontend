@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import useLoading from "../../components/Provider/useLoading";
 import {
   Box,
   Button,
@@ -20,6 +21,7 @@ import authService from "../../services/authService";
 import axios from "axios"; // ✅ to fetch country codes
 
 const PatientRegister = () => {
+  const { setLoading } = useLoading();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -71,7 +73,7 @@ const PatientRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+    setLoading(true); 
     if (!username.trim()) return setError("Please enter a username.");
     if (!validateEmail(email)) return setError("Please enter a valid email.");
     if (password.length < 6)
@@ -92,6 +94,8 @@ const PatientRegister = () => {
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.detail || err.message || "Registration failed");
+    } finally{
+         setLoading(false); 
     }
   };
 
