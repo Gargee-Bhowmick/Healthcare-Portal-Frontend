@@ -11,11 +11,11 @@ import {
   Alert,
   Link,
 } from "@mui/material";
-import authService from "../../services/authService"; // <-- use the service we defined
+import authService from "../../services/authService"; 
 
 const Login = () => {
   const { setLoading } = useLoading();
-  const [username, setUsername] = useState(""); // backend expects username, not email
+  const [username, setUsername] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -27,19 +27,22 @@ const Login = () => {
     try {
       const data = await authService.login({ username, password });
 
+      // save tokens/role in localStorage
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("role", data.role);
 
+      // ✅ redirect to correct landing page
       if (data.role === "doctor") {
-        navigate("/doctor");
+        navigate("/doctor/timetable"); // or /doctor/dashboard
       } else if (data.role === "patient") {
-        navigate("/patient");
+        navigate("/patient/profile"); // or /patient/dashboard
       } else {
         setError("Unknown user role");
       }
     } catch (err) {
-      setError("Invalid username or password", err);
-    } finally{
+      console.error("Login error:", err);
+      setError("Invalid username or password");
+    } finally {
       setLoading(false);
     }
   };

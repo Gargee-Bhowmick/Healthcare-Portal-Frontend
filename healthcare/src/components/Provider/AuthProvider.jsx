@@ -1,11 +1,14 @@
 import { createContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import authService from "../../services/authService";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
   const [token, setToken] = useState(authService.getToken());
   const [role, setRole] = useState(authService.getRole());
   const [userId, setUserId] = useState(authService.getUserId());
@@ -19,25 +22,39 @@ export const AuthProvider = ({ children }) => {
       setUserId(null);
       navigate("/login", { replace: true });
     };
+
     window.addEventListener("unauthorized", handleUnauthorized);
+
+    // Redirect only if user is on public pages
+    const publicPaths = ["/login", "/register"];
+    if (token && role && publicPaths.includes(location.pathname)) {
+      if (role === "doctor") navigate("/doctor", { replace: true });
+      else if (role === "patient") navigate("/patient", { replace: true });
+    }
+
     return () => window.removeEventListener("unauthorized", handleUnauthorized);
-  }, [navigate]);
+  }, [token, role, location.pathname, navigate]);
 
   const login = async (credentials) => {
     const data = await authService.login(credentials);
+
     setToken(data.access_token);
     setRole(data.role);
 
+    // Decode JWT for userId
     const decoded = jwtDecode(data.access_token);
-    setUserId(decoded.sub || "");
+    const userIdFromToken = decoded.sub || "";
+    setUserId(userIdFromToken);
 
-    if (data.role === "doctor") {
-      navigate("/doctor", { replace: true });
-    } else if (data.role === "patient") {
-      navigate("/patient", { replace: true });
-    } else {
-      navigate("/login", { replace: true });
-    }
+    // Redirect only if on public pages
+  // ✅ Always go to role root after login
+  if (data.role === "doctor") {
+    navigate("/doctor", { replace: true });
+  } else if (data.role === "patient") {
+    navigate("/patient", { replace: true });
+  } else {
+    navigate("/login", { replace: true });
+  }
 
     return data;
   };

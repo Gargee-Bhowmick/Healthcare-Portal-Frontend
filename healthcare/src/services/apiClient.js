@@ -15,7 +15,7 @@ const apiClient = axios.create({
 // Request interceptor: attach token if exists
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("myapp_access_token");
+    const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,8 +29,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("myapp_access_token");
-      localStorage.removeItem("myapp_user_role");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_role");
       window.dispatchEvent(new Event("unauthorized"));
     }
     return Promise.reject(error);
