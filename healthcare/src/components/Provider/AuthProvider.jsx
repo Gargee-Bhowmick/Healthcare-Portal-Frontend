@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
-import * as jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     setToken(data.access_token);
     setRole(data.role);
 
-    const decoded = jwt_decode(data.access_token);
+    const decoded = jwtDecode(data.access_token);
     setUserId(decoded.sub || "");
 
     if (data.role === "doctor") {

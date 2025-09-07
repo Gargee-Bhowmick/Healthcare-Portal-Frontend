@@ -1,10 +1,10 @@
 // authService.js
 import apiClient from "./apiClient";
-import * as jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
-const TOKEN_KEY = "myapp_access_token";
-const ROLE_KEY = "myapp_user_role";
-const USER_ID_KEY = "myapp_user_id";
+const TOKEN_KEY = "access_token";
+const ROLE_KEY = "role";
+const USER_ID_KEY = "user_id";
 
 const authService = {
   register: async (userData) => {
@@ -18,6 +18,7 @@ const authService = {
   },
 
   login: async ({ username, password }) => {
+    try{
     const response = await apiClient.post(
       "/login",
       new URLSearchParams({
@@ -30,18 +31,27 @@ const authService = {
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
-
+    console.log("Login response:", response.data);
     const { access_token, role } = response.data;
 
     // Save token and role
+console.log("Saving token...");
     localStorage.setItem(TOKEN_KEY, access_token);
+
     localStorage.setItem(ROLE_KEY, role);
 
     // Decode JWT to get user_id
-    const decoded = jwt_decode(access_token);
-    localStorage.setItem(USER_ID_KEY, decoded.sub || "");
+    const decoded = jwtDecode(access_token);
+    localStorage.setItem(USER_ID_KEY, decoded.sub);
+    console.log("Token saved:", localStorage.getItem(TOKEN_KEY));
+    console.log("User ID saved:", localStorage.getItem(USER_ID_KEY));
 
     return response.data;
+  }
+  catch(error){
+    console.error("Login error:", error);
+    throw error;
+  }
   },
 
   logout: () => {
