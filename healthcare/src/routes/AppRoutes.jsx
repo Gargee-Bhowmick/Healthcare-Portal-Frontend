@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "../components/common/ProtectedRoute";
-import { AuthProvider } from "../components/common/AuthProvider";
+import ProtectedRoute from "../components/Provider/ProtectedRoute";
+import { AuthProvider } from "../components/Provider/AuthProvider";
 
 // Patient Pages
 import BookAppointment from "../pages/patient/BookAppointment";
