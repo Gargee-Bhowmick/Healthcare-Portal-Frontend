@@ -31,11 +31,11 @@ const authService = {
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
-    console.log("Login response:", response.data);
+    // console.log("Login response:", response.data);
     const { access_token, role } = response.data;
 
     // Save token and role
-console.log("Saving token...");
+    console.log("Saving token...");
     localStorage.setItem(TOKEN_KEY, access_token);
 
     localStorage.setItem(ROLE_KEY, role);
@@ -43,8 +43,8 @@ console.log("Saving token...");
     // Decode JWT to get user_id
     const decoded = jwtDecode(access_token);
     localStorage.setItem(USER_ID_KEY, decoded.sub);
-    console.log("Token saved:", localStorage.getItem(TOKEN_KEY));
-    console.log("User ID saved:", localStorage.getItem(USER_ID_KEY));
+    // console.log("Token saved:", localStorage.getItem(TOKEN_KEY));
+    // console.log("User ID saved:", localStorage.getItem(USER_ID_KEY));
 
     return response.data;
   }
