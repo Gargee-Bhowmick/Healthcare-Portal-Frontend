@@ -35,7 +35,7 @@ const BookAppointment = () => {
     const fetchDoctors = async () => {
       try {
         const res = await fetch(
-          "https://hms-b0e0ash9b3fda7ab.southeastasia-01.azurewebsites.net/doctors"
+          "https://hms-b0e0ash9b3fda7ab.southeastasia-01.azurewebsites.net/doctors/"
         );
         if (!res.ok) throw new Error("Failed to fetch doctors");
         const data = await res.json();
@@ -76,7 +76,7 @@ const BookAppointment = () => {
       };
 
       const res = await fetch(
-        `https://hms-b0e0ash9b3fda7ab.southeastasia-01.azurewebsites.net/appointments/${selectedDoctor.id}/${patient_id}`,
+        `https://hms-b0e0ash9b3fda7ab.southeastasia-01.azurewebsites.net/appointments/${selectedDoctor.id}/${patient_id}/`,
         {
           method: "POST",
           headers: {
