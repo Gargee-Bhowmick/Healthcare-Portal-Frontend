@@ -1,259 +1,156 @@
-import {useContext} from "react";
-import AppContext from "../../context/appContext"
+import { useState, useEffect } from "react";
 import {
   Box,
-  Card,
-  CardContent,
-  CardMedia,
+  TextField,
   Typography,
-  Grid,
-  Chip,
-  Divider,
-  Stack,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText,
-  Rating,
-  Paper,
   Button,
+  Paper,
+  MenuItem,
+  Alert,
+  Stack,
 } from "@mui/material";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import StarIcon from "@mui/icons-material/Star";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import LanguageIcon from "@mui/icons-material/Language";
-import SchoolIcon from "@mui/icons-material/School";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-
+import doctorService from "../../services/doctorService";
+import useLoading from "../../components/Provider/useLoading"; // import hook
 
 export default function DocProfile() {
-  const {doctor} = useContext(AppContext)
+  const { setLoading } = useLoading(); // ✅ global loading
+  const [formData, setFormData] = useState({
+    specialization: "",
+    full_name: "",
+    age: "",
+    gender: "",
+    experience_years: "",
+  });
+
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Fetch doctor details on page load
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      const doctorId = localStorage.getItem("user_id");
+      if (!doctorId) {
+        console.log("doctor ID not found")
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await doctorService.getById(doctorId);
+        console.log("Doctor details:", response.data);
+        setFormData(response.data); // prefill form
+      } catch (err) {
+        setError("Failed to load doctor details.",err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctor();
+  }, []);
+
+const handleChange = (e) => {
+  const { name, value, type } = e.target;
+  
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "number" ? Number(value) : value,
+  }));
+};
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSuccess(null);
+    setError(null);
+
+    const doctorId = localStorage.getItem("user_id");
+    setLoading(true);
+    try {
+      if (doctorId) {
+        console.log("Form Data", formData)
+        await doctorService.create(formData);
+        setSuccess("Doctor profile updated successfully!");
+      } else {
+        await doctorService.create(formData);
+        setSuccess("Doctor created successfully!");
+      }
+    } catch (err) {
+      setError("Failed to save doctor details. Please try again.",err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Box sx={{ p: { xs: 1, md: 4 }, bgcolor: "#f9fafb", minHeight: "100vh" }}>
-            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-              <Typography variant="h4" fontWeight={700} color="primary.dark">
-                Profile
-              </Typography>
-            </Stack>
-            <Divider sx={{ mb: 3 }} />
-      <Paper elevation={3} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, mb: 3 }}>
-        <Grid container spacing={3}>
-          {/* Left: Photo & Basic Info */}
-          <Grid item xs={12} md={4}>
-            <Card elevation={2} sx={{ borderRadius: 3, mb: 2 }}>
-              <CardMedia
-                component="img"
-                height="260"
-                image={doctor.photo}
-                alt={doctor.fullName}
-                sx={{ objectFit: "cover" }}
-              />
-              <CardContent>
-                <Typography variant="h5" fontWeight={700} gutterBottom>
-                  {doctor.fullName}
-                </Typography>
-                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                  {doctor.designation}, {doctor.department}
-                </Typography>
-                <Chip
-                  icon={<LocalHospitalIcon />}
-                  label={doctor.specialization}
-                  color="primary"
-                  sx={{ mb: 1 }}
-                />
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {doctor.subSpecialization}
-                </Typography>
-                <Divider sx={{ my: 1 }} />
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                  <PhoneIcon fontSize="small" color="action" />
-                  <Typography variant="body2">{doctor.contact.phone}</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                  <EmailIcon fontSize="small" color="action" />
-                  <Typography variant="body2">{doctor.contact.email}</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                  <LocationOnIcon fontSize="small" color="action" />
-                  <Typography variant="body2">{doctor.location}</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <VerifiedUserIcon fontSize="small" color="action" />
-                  <Typography variant="body2">
-                    License: {doctor.license.number} ({doctor.license.state})
-                  </Typography>
-                </Stack>
-              </CardContent>
-            </Card>
-            <Card elevation={2} sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  Languages Spoken
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {doctor.languages.map((lang) => (
-                    <Chip
-                      key={lang}
-                      icon={<LanguageIcon />}
-                      label={lang}
-                      color="info"
-                      sx={{ mb: 1 }}
-                    />
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
+    <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: "#f9fafb", minHeight: "100vh" }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3, maxWidth: 600, mx: "auto" }}>
+        <Typography variant="h4" fontWeight={700} mb={3} color="primary.dark">
+          Doctor Profile
+        </Typography>
 
-          {/* Right: Professional & Practice Info */}
-          <Grid item xs={12} md={8}>
-            <Card elevation={2} sx={{ borderRadius: 3, mb: 2 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Professional Credentials
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
-                  {doctor.qualifications.map((q) => (
-                    <Chip
-                      key={q}
-                      icon={<SchoolIcon />}
-                      label={q}
-                      color="success"
-                      sx={{ mb: 1 }}
-                    />
-                  ))}
-                </Stack>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Experience:</b> {doctor.experience} years
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Board Certifications:</b> {doctor.boardCertifications.join(", ")}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Memberships:</b> {doctor.memberships.join(", ")}
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Practice Information
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Current Affiliation:</b> {doctor.hospital}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Department:</b> {doctor.department}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Role:</b> {doctor.designation}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Patients Treated:</b> {doctor.patientsTreated}
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Availability & Scheduling
-                </Typography>
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                  <AccessTimeIcon color="primary" />
-                  <Stack>
-                    {doctor.consultingHours.map((slot, idx) => (
-                      <Typography key={idx} variant="body2">
-                        <b>{slot.day}:</b> {slot.time}
-                      </Typography>
-                    ))}
-                  </Stack>
-                </Stack>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Appointment Slots:</b>{" "}
-                  {doctor.appointmentSlots.map((slot, idx) => (
-                    <Chip
-                      key={slot}
-                      label={slot}
-                      color="primary"
-                      size="small"
-                      sx={{ mr: 0.5, mb: 0.5 }}
-                    />
-                  ))}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Telemedicine:</b> {doctor.telemedicine ? "Available" : "Not Available"}
-                </Typography>
-              </CardContent>
-            </Card>
+        {success && <Alert severity="success">{success}</Alert>}
+        {error && <Alert severity="error">{error}</Alert>}
 
-            {/* Regulatory & Compliance */}
-            <Card elevation={2} sx={{ borderRadius: 3, mb: 2 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Regulatory & Compliance
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>License Number:</b> {doctor.license.number} ({doctor.license.state})
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Board Certifications:</b> {doctor.boardCertifications.join(", ")}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Memberships:</b> {doctor.memberships.join(", ")}
-                </Typography>
-              </CardContent>
-            </Card>
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <TextField
+              label="Full Name"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
 
-            {/* Publications & Awards */}
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Card elevation={2} sx={{ borderRadius: 3, mb: 2 }}>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                      <MenuBookIcon color="primary" />
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        Research Publications
-                      </Typography>
-                    </Stack>
-                    <List dense>
-                      {doctor.publications.map((pub, idx) => (
-                        <ListItem key={idx}>
-                          <ListItemText
-                            primary={pub.title}
-                            secondary={`${pub.journal}, ${pub.year}`}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Card elevation={2} sx={{ borderRadius: 3, mb: 2 }}>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                      <EmojiEventsIcon color="secondary" />
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        Awards & Recognitions
-                      </Typography>
-                    </Stack>
-                    <List dense>
-                      {doctor.awards.map((award, idx) => (
-                        <ListItem key={idx}>
-                          <ListItemText
-                            primary={award.title}
-                            secondary={`${award.by}, ${award.year}`}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+            <TextField
+              label="Specialization"
+              name="specialization"
+              value={formData.specialization}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+
+            <TextField
+              label="Age"
+              name="age"
+              type="number"
+              value={formData.age}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+
+            <TextField
+              select
+              label="Gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              required
+              fullWidth
+            >
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </TextField>
+
+            <TextField
+              label="Experience (Years)"
+              name="experience_years"
+              type="number"
+              value={formData.experience_years}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+
+            <Button type="submit" variant="contained" color="primary">
+              Save Profile
+            </Button>
+          </Stack>
+        </form>
       </Paper>
     </Box>
   );

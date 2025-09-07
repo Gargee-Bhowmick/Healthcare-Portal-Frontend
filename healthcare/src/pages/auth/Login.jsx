@@ -33,7 +33,7 @@ const Login = () => {
 
       // ✅ redirect to correct landing page
       if (data.role === "doctor") {
-        navigate("/doctor/timetable"); // or /doctor/dashboard
+        navigate("/doctor/profile"); // or /doctor/dashboard
       } else if (data.role === "patient") {
         navigate("/patient/profile"); // or /patient/dashboard
       } else {
