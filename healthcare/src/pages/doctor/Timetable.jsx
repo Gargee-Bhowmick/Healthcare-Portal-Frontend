@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -14,14 +14,18 @@ import {
   Tooltip,
   Divider,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import PersonIcon from "@mui/icons-material/Person";
 import { useNavigate } from "react-router-dom";
-import dayjs from "dayjs";
-import appointmentService from "../../services/appointmentService"; // add this
-import useLoading from "../../components/Provider/useLoading"; // import hook
-
+import appointmentService from "../../services/appointmentService";
+import patientService from "../../services/patientService";
+import useLoading from "../../components/Provider/useLoading";
 
 // Generate 30-min slots for 9 hours (8:00 to 16:30)
 const timeSlots = [];
@@ -33,66 +37,110 @@ for (let h = 8; h < 17; h++) {
   }
 }
 
-// Weekdays
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-// Get start of current week (Monday)
-const getWeekStart = () => dayjs().startOf("week").add(1, "day");
-
 const Timetable = () => {
-  const { loading, setLoading } = useLoading(); 
   const theme = useTheme();
   const navigate = useNavigate();
+  const { setLoading } = useLoading();
+
   const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState({});
   const [error, setError] = useState(null);
 
-  // Fetch appointments from backend
+  // Dialog state
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  const handleOpenDialog = (patientData) => {
+    setSelectedPatient(patientData);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedPatient(null);
+    setOpenDialog(false);
+  };
+
+  // fetch appointments and patients
   useEffect(() => {
     const fetchAppointments = async () => {
       setLoading(true);
       setError(null);
       const doctorId = localStorage.getItem("user_id");
+
       if (!doctorId) {
-        console.log("doctor ID not found")
+        console.log("doctor ID not found");
         return;
       }
+
       try {
-        const response = await appointmentService.getByDoctor(doctorId); 
-        setAppointments(response.data); // assuming axios response
-        console.log("Fetched appointments:", response.data);
+        const response = await appointmentService.getByDoctor(doctorId);
+        const data = response.data;
+        setAppointments(data);
+        console.log("timetable", data);
+
+        // fetch unique patient details
+        const uniqueIds = [...new Set(data.map((a) => a.patient_id))];
+        console.log("unique ids", uniqueIds);
+        const patientPromises = uniqueIds.map((id) =>
+          patientService.getByIdPatient(id).then((res) => ({
+            id,
+            data: res.data,
+          }))
+        );
+
+        const patientResults = await Promise.all(patientPromises);
+        const patientMap = {};
+        patientResults.forEach(({ id, data }) => {
+          patientMap[id] = data;
+        });
+        setPatients(patientMap);
       } catch (err) {
-        setError("Failed to fetch appointments",err);
+        setError("Failed to fetch appointments");
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAppointments();
-  }, []);
+  }, [setLoading]);
 
-  // Process bookings for this week
+  // filter this week's appointments
   const weeklyBookings = useMemo(() => {
-    const weekStart = getWeekStart();
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Monday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 4); // Friday
+
     const weekDaysMap = {};
-    days.forEach((day) => (weekDaysMap[day] = {}));
+    days.forEach((d) => (weekDaysMap[d] = {}));
 
     appointments.forEach((b) => {
-      const date = dayjs(b.appointment_date);
-      const dayOfWeek = date.format("dddd");
-      if (date.isAfter(weekStart.subtract(1, "day")) && date.isBefore(weekStart.add(5, "day"))) {
-        const slot = dayjs(b.appointment_time, "HH:mm:ss.SSSZ").format("HH:mm");
-        weekDaysMap[dayOfWeek][slot] = {
-          patientName: b.patient_name || "Patient",
-          patientId: b.patient_id,
-        };
+      const date = new Date(b.appointment_date);
+      if (date >= startOfWeek && date <= endOfWeek) {
+        const dayOfWeek = days[date.getDay() - 1]; // map Monday=0
+        const slot = b.appointment_time.slice(0, 5);
+        const patient = patients[b.patient_id];
+        if (dayOfWeek && timeSlots.includes(slot)) {
+          weekDaysMap[dayOfWeek][slot] = {
+            patientId: b.patient_id,
+            patientName: patient?.full_name || "Patient",
+            age: patient?.age,
+            gender: patient?.gender,
+            address: patient?.address,
+            appointmentDate: b.appointment_date,
+            appointmentTime: slot,
+            reason: b.reason,
+            medicalHistory: patient?.medical_history,
+          };
+        }
       }
     });
 
     return weekDaysMap;
-  }, [appointments]);
-
-  if (loading) return <Typography>Loading timetable...</Typography>;
-  if (error) return <Typography color="error">{error}</Typography>;
+  }, [appointments, patients]);
 
   return (
     <Box
@@ -109,6 +157,13 @@ const Timetable = () => {
         </Typography>
       </Stack>
       <Divider sx={{ mb: 3 }} />
+
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
+
       <Paper
         elevation={4}
         sx={{
@@ -138,9 +193,15 @@ const Timetable = () => {
         >
           <TableHead>
             <TableRow>
-              <TableCell sx={{ width: 90, fontWeight: 700, fontSize: 15 }}>Time</TableCell>
+              <TableCell sx={{ width: 90, fontWeight: 700, fontSize: 15 }}>
+                Time
+              </TableCell>
               {days.map((day) => (
-                <TableCell key={day} align="center" sx={{ fontWeight: 700, fontSize: 15 }}>
+                <TableCell
+                  key={day}
+                  align="center"
+                  sx={{ fontWeight: 700, fontSize: 15 }}
+                >
                   {day}
                 </TableCell>
               ))}
@@ -156,7 +217,9 @@ const Timetable = () => {
                   transition: "background 0.2s",
                 }}
               >
-                <TableCell sx={{ fontWeight: 600, color: "#1976d2" }}>{slot}</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#1976d2" }}>
+                  {slot}
+                </TableCell>
                 {days.map((day) => {
                   const booking = weeklyBookings[day]?.[slot];
                   return (
@@ -172,7 +235,10 @@ const Timetable = () => {
                       }}
                     >
                       {booking ? (
-                        <Tooltip title={`View ${booking.patientName}'s profile`} arrow>
+                        <Tooltip
+                          title={`Name: ${booking.patientName}, Reason: ${booking.reason}`}
+                          arrow
+                        >
                           <Link
                             component="button"
                             underline="none"
@@ -192,7 +258,7 @@ const Timetable = () => {
                                 textDecoration: "underline",
                               },
                             }}
-                            onClick={() => navigate(`/doctor/patient-details/${booking.patientId}`)}
+                            onClick={() => handleOpenDialog(booking)}
                           >
                             <PersonIcon sx={{ fontSize: 18, mr: 0.5 }} />
                             {booking.patientName}
@@ -219,9 +285,58 @@ const Timetable = () => {
           </TableBody>
         </Table>
       </Paper>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block", textAlign: "right" }}>
-        * Click on a patient name to view their profile.
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mt: 2, display: "block", textAlign: "right" }}
+      >
+        * Click on a patient name to view their details.
       </Typography>
+
+      {/* Patient Details Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Patient & Appointment Details</DialogTitle>
+        <DialogContent dividers>
+          {selectedPatient ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {/* Patient Info */}
+              <Typography variant="h6" color="primary">
+                Patient Information
+              </Typography>
+              <Typography><b>Name:</b> {selectedPatient.patientName}</Typography>
+              <Typography><b>Age:</b> {selectedPatient.age}</Typography>
+              <Typography><b>Gender:</b> {selectedPatient.gender}</Typography>
+              <Typography><b>Address:</b> {selectedPatient.address}</Typography>
+              <Typography><b>ID:</b> {selectedPatient.patientId}</Typography>
+              <Typography><b>Medical History:</b> {selectedPatient.medicalHistory || "N/A"}</Typography>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Appointment Info */}
+              <Typography variant="h6" color="primary">
+                Appointment Information
+              </Typography>
+              <Typography>
+                <b>Date:</b>{" "}
+                {new Date(selectedPatient.appointmentDate).toDateString()}
+              </Typography>
+              <Typography>
+                <b>Time:</b> {selectedPatient.appointmentTime}
+              </Typography>
+              <Typography>
+                <b>Reason:</b> {selectedPatient.reason || "N/A"}
+              </Typography>
+            </Box>
+          ) : (
+            <Typography>No details available</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} variant="contained" color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
