@@ -8,6 +8,7 @@ const USER_ID_KEY = "user_id";
 
 const authService = {
   register: async (userData) => {
+    try{
     const response = await apiClient.post("/register", userData);
     const { user_id } = response.data;
 
@@ -15,6 +16,11 @@ const authService = {
     localStorage.setItem(USER_ID_KEY, user_id);
 
     return response.data;
+    }
+    catch(error){
+      console.error("Registration error:", error);
+      throw error;
+    }
   },
 
   login: async ({ username, password }) => {

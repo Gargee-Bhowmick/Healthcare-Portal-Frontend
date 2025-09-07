@@ -74,14 +74,28 @@ const PatientRegister = () => {
     e.preventDefault();
     setError("");
     setLoading(true); 
-    if (!username.trim()) return setError("Please enter a username.");
-    if (!validateEmail(email)) return setError("Please enter a valid email.");
-    if (password.length < 6)
+    if (!username.trim()) {
+      setLoading(false); 
+      return setError("Please enter a username.");
+
+    }
+    if (!validateEmail(email)) 
+      {
+            setLoading(false); 
+            return setError("Please enter a valid email.");
+      }
+    if (password.length < 6){
+      setLoading(false);
       return setError("Password must be at least 6 characters long.");
-    if (password !== confirmPassword)
+    }
+    if (password !== confirmPassword){
+      setLoading(false);
       return setError("Passwords do not match.");
-    if (!/^\d{7,15}$/.test(phone))
+    }
+    if (!/^\d{7,15}$/.test(phone)){
+      setLoading(false);
       return setError("Please enter a valid phone number (digits only).");
+    }
 
     try {
       await authService.register({

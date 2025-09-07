@@ -25,8 +25,8 @@ const Login = () => {
     setError("");
     setLoading(true);
     try {
-      const data = await authService.login({ username, password });
-
+      let data = await authService.login({ username, password });
+      data = await authService.login({ username, password });
       // save tokens/role in localStorage
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("role", data.role);
