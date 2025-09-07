@@ -1,5 +1,4 @@
-// AuthProvider.jsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 
@@ -11,7 +10,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(authService.getToken());
   const isAuthenticated = !!token;
 
-  // Handle 401 Unauthorized from apiClient
   useEffect(() => {
     const handleUnauthorized = () => {
       authService.logout();
@@ -19,7 +17,6 @@ export const AuthProvider = ({ children }) => {
       setRole(null);
       navigate("/login", { replace: true });
     };
-
     window.addEventListener("unauthorized", handleUnauthorized);
     return () => window.removeEventListener("unauthorized", handleUnauthorized);
   }, [navigate]);
@@ -29,13 +26,12 @@ export const AuthProvider = ({ children }) => {
     setToken(data.access_token);
     setRole(data.role);
 
-    // Role-based redirect
     if (data.role === "doctor") {
       navigate("/doctor", { replace: true });
     } else if (data.role === "patient") {
       navigate("/patient", { replace: true });
     } else {
-      navigate("/login", { replace: true }); // fallback
+      navigate("/login", { replace: true });
     }
 
     return data;
@@ -49,18 +45,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        role,
-        isAuthenticated,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ token, role, isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export default AuthContext;
