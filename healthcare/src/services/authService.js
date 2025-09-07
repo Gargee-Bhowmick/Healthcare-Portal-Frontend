@@ -1,33 +1,47 @@
-// authService.js
 import apiClient from "./apiClient";
+import * as jwt_decode from 'jwt-decode';
 
-// Centralized keys (good practice)
+
+
 const TOKEN_KEY = "myapp_access_token";
 const ROLE_KEY = "myapp_user_role";
+const USER_ID_KEY = "myapp_user_id"; // new key
 
 const authService = {
-  register: (userData) => apiClient.post("/register", userData),
+  register: async (userData) => {
+    const response = await apiClient.post("/register", userData);
+    const { user_id } = response.data;
+
+    // Save user_id in localStorage
+    localStorage.setItem(USER_ID_KEY, user_id);
+
+    return response.data;
+  },
 
   login: async ({ username, password }) => {
-    // FastAPI OAuth2 expects x-www-form-urlencoded
     const response = await apiClient.post(
       "/login",
       new URLSearchParams({
-        grant_type: "password", // required by FastAPI spec
+        grant_type: "password",
         username,
         password,
-        scope: "", // empty unless you use scopes
-        client_id: "", // ignored by FastAPI default
-        client_secret: "", // ignored by FastAPI default
+        scope: "",
+        client_id: "",
+        client_secret: "",
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
     const { access_token, role } = response.data;
 
-    // Save tokens in localStorage
+    // Decode JWT to get userID
+    const decoded = jwt_decode(access_token);
+    const userId = decoded.sub; // assuming 'sub' contains userID
+
+    // Save tokens, role, and userId in localStorage
     localStorage.setItem(TOKEN_KEY, access_token);
     localStorage.setItem(ROLE_KEY, role);
+    localStorage.setItem(USER_ID_KEY, userId);
 
     return response.data;
   },
@@ -35,10 +49,12 @@ const authService = {
   logout: () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(ROLE_KEY);
+    localStorage.removeItem(USER_ID_KEY);
   },
 
   getToken: () => localStorage.getItem(TOKEN_KEY),
   getRole: () => localStorage.getItem(ROLE_KEY),
+  getUserId: () => localStorage.getItem(USER_ID_KEY),
   isAuthenticated: () => !!localStorage.getItem(TOKEN_KEY),
 };
 
