@@ -1,11 +1,10 @@
+// authService.js
 import apiClient from "./apiClient";
-import * as jwt_decode from 'jwt-decode';
-
-
+import * as jwt_decode from "jwt-decode";
 
 const TOKEN_KEY = "myapp_access_token";
 const ROLE_KEY = "myapp_user_role";
-const USER_ID_KEY = "myapp_user_id"; // new key
+const USER_ID_KEY = "myapp_user_id";
 
 const authService = {
   register: async (userData) => {
@@ -34,14 +33,13 @@ const authService = {
 
     const { access_token, role } = response.data;
 
-    // Decode JWT to get userID
-    const decoded = jwt_decode(access_token);
-    const userId = decoded.sub; // assuming 'sub' contains userID
-
-    // Save tokens, role, and userId in localStorage
+    // Save token and role
     localStorage.setItem(TOKEN_KEY, access_token);
     localStorage.setItem(ROLE_KEY, role);
-    localStorage.setItem(USER_ID_KEY, userId);
+
+    // Decode JWT to get user_id
+    const decoded = jwt_decode(access_token);
+    localStorage.setItem(USER_ID_KEY, decoded.sub || "");
 
     return response.data;
   },
