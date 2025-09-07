@@ -119,6 +119,7 @@
     "Surgery Report",
     "Discharge Summary",
   ];
+  
 // Frontend specific
   export const s_dateFilters = [
     "All",
