@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8000", // change to your backend URL
+  baseURL: "http://localhost:8000", // backend URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,8 +25,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.warn("Unauthorized - Redirecting to login");
-      // optional: redirect to login page
+      localStorage.removeItem("access_token"); // clear token
+      window.dispatchEvent(new Event("unauthorized")); // custom event
     }
     return Promise.reject(error);
   }
