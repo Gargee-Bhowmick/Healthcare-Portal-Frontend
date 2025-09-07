@@ -30,14 +30,14 @@ export default function DocProfile() {
     const fetchDoctor = async () => {
       const doctorId = localStorage.getItem("user_id");
       if (!doctorId) {
-        console.log("doctor ID not found")
+        //console.log("doctor ID not found")
         return;
       }
 
       setLoading(true);
       try {
         const response = await doctorService.getById(doctorId);
-        console.log("Doctor details:", response.data);
+        //console.log("Doctor details:", response.data);
         setFormData(response.data); // prefill form
       } catch (err) {
         setError("Failed to load doctor details.",err);
@@ -68,7 +68,7 @@ const handleChange = (e) => {
     setLoading(true);
     try {
       if (doctorId) {
-        console.log("Form Data", formData)
+        //console.log("Form Data", formData)
         await doctorService.create(formData);
         setSuccess("Doctor profile updated successfully!");
       } else {

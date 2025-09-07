@@ -112,7 +112,7 @@ export default function PatientProfile() {
 
   const handleSubmit = async () => {
     try {
-      console.log(form)
+      //console.log(form)
       const res = await fetch(`/api/patients/${form.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

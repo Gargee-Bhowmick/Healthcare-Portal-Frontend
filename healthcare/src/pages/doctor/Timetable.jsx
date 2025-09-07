@@ -70,7 +70,7 @@ const Timetable = () => {
       const doctorId = localStorage.getItem("user_id");
 
       if (!doctorId) {
-        console.log("doctor ID not found");
+        //console.log("doctor ID not found");
         return;
       }
 
@@ -78,11 +78,11 @@ const Timetable = () => {
         const response = await appointmentService.getByDoctor(doctorId);
         const data = response.data;
         setAppointments(data);
-        console.log("timetable", data);
+        //console.log("timetable", data);
 
         // fetch unique patient details
         const uniqueIds = [...new Set(data.map((a) => a.patient_id))];
-        console.log("unique ids", uniqueIds);
+        //console.log("unique ids", uniqueIds);
         const patientPromises = uniqueIds.map((id) =>
           patientService.getByIdPatient(id).then((res) => ({
             id,

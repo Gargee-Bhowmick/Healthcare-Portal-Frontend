@@ -31,7 +31,7 @@ export default function PatientDetails() {
         const res = await patientService.getAll();
         if (Array.isArray(res.data)) {
           setPatients(res.data);
-          console.log("patients ", res.data);
+          //console.log("patients ", res.data);
           setSelectedIndex(0); // default to first
         } else {
           // If API gives a single patient object
