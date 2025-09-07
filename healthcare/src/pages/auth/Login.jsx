@@ -10,9 +10,10 @@ import {
   Alert,
   Link,
 } from "@mui/material";
+import authService from "../../services/authService"; // <-- use the service we defined
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // backend expects username, not email
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -22,16 +23,9 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const data = await authService.login({ username, password });
 
-      if (!response.ok) throw new Error("Invalid credentials");
-
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("role", data.role);
 
       if (data.role === "doctor") {
@@ -42,7 +36,7 @@ const Login = () => {
         setError("Unknown user role");
       }
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError("Invalid username or password", err);
     }
   };
 
@@ -82,13 +76,12 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <TextField
-              label="Email"
-              type="email"
+              label="Username"
               fullWidth
               required
               margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
             />
             <TextField

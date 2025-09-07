@@ -11,11 +11,12 @@ import {
   Link,
   LinearProgress,
 } from "@mui/material";
+import authService from "../../services/authService"; // ✅ import service
 
 const PatientRegister = () => {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [countryCode, setCountryCode] = useState("+91"); // default India
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(""); // backend expects number only
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,6 +35,10 @@ const PatientRegister = () => {
     e.preventDefault();
     setError("");
 
+    // frontend validation
+    if (!username.trim()) {
+      return setError("Please enter a username.");
+    }
     if (!validateEmail(email)) {
       return setError("Please enter a valid email address.");
     }
@@ -44,178 +49,172 @@ const PatientRegister = () => {
       return setError("Passwords do not match.");
     }
     if (!/^\d{7,15}$/.test(phone)) {
-      return setError("Please enter a valid phone number.");
+      return setError("Please enter a valid phone number (digits only).");
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          phone: `${countryCode}${phone}`,
-        }),
+      await authService.register({
+        username,
+        email,
+        password,
+        role: "patient", // ✅ backend requires role
+        ph_number: Number(phone), // ✅ backend expects number
       });
-
-      if (!response.ok) throw new Error("Registration failed");
 
       navigate("/login");
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      setError(err.response?.data?.detail || err.message || "Registration failed");
     }
   };
 
   const strength = getPasswordStrength(password);
 
-return (
+  return (
     <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-        bgcolor="#f5f7fa"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      bgcolor="#f5f7fa"
     >
-        <Card
-            sx={{
-                width: 420,
-                borderRadius: 3,
-                boxShadow: 3,
-                p: 2,
-            }}
-        >
-            <CardContent>
+      <Card
+        sx={{
+          width: 420,
+          borderRadius: 3,
+          boxShadow: 3,
+          p: 2,
+        }}
+      >
+        <CardContent>
+          <Typography
+            variant="h5"
+            fontWeight="600"
+            textAlign="center"
+            gutterBottom
+          >
+            Create Account
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign="center"
+            mb={3}
+          >
+            Register as a patient to get started
+          </Typography>
+
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Username"
+              fullWidth
+              required
+              margin="normal"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+
+            <TextField
+              label="Email"
+              type="email"
+              fullWidth
+              required
+              margin="normal"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <TextField
+              label="Phone Number"
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              margin="normal"
+              fullWidth
+              inputProps={{ maxLength: 15 }}
+            />
+
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              required
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            {password && (
+              <Box sx={{ mt: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={strength.value}
+                  color={strength.color}
+                  sx={{ borderRadius: 2 }}
+                />
                 <Typography
-                    variant="h5"
-                    fontWeight="600"
-                    textAlign="center"
-                    gutterBottom
+                  variant="caption"
+                  color={`${strength.color}.main`}
+                  display="block"
+                  mt={0.5}
                 >
-                    Create Account
+                  {strength.label} password
                 </Typography>
-                <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    textAlign="center"
-                    mb={3}
-                >
-                    Register as a patient to get started
-                </Typography>
+              </Box>
+            )}
 
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Email"
-                        type="email"
-                        fullWidth
-                        required
-                        margin="normal"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+            <TextField
+              label="Confirm Password"
+              type="password"
+              fullWidth
+              required
+              margin="normal"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
 
-                    <Box display="flex" alignItems="center" gap={1} mt={2} mb={1}>
-                        <TextField
-                            label="Code"
-                            value={countryCode}
-                            required
-                            onChange={(e) => setCountryCode(e.target.value)}
-                            margin="none"
-                            sx={{ width: 90 }}
-                            inputProps={{ maxLength: 5 }}
-                        />
-                        <TextField
-                            label="Phone Number"
-                            type="tel"
-                            required
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            margin="none"
-                            fullWidth
-                        />
-                    </Box>
+            {error && (
+              <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+                {error}
+              </Alert>
+            )}
 
-                    <TextField
-                        label="Password"
-                        type="password"
-                        fullWidth
-                        required
-                        margin="normal"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{
+                mt: 3,
+                py: 1.2,
+                borderRadius: 2,
+                textTransform: "none",
+                fontSize: "1rem",
+              }}
+            >
+              Register
+            </Button>
+          </form>
 
-                    {password && (
-                        <Box sx={{ mt: 1 }}>
-                            <LinearProgress
-                                variant="determinate"
-                                value={strength.value}
-                                color={strength.color}
-                                sx={{ borderRadius: 2 }}
-                            />
-                            <Typography
-                                variant="caption"
-                                color={`${strength.color}.main`}
-                                display="block"
-                                mt={0.5}
-                            >
-                                {strength.label} password
-                            </Typography>
-                        </Box>
-                    )}
-
-                    <TextField
-                        label="Confirm Password"
-                        type="password"
-                        fullWidth
-                        required
-                        margin="normal"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-
-                    {error && (
-                        <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
-
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        fullWidth
-                        sx={{
-                            mt: 3,
-                            py: 1.2,
-                            borderRadius: 2,
-                            textTransform: "none",
-                            fontSize: "1rem",
-                        }}
-                    >
-                        Register
-                    </Button>
-                </form>
-
-                {/* Already a user? Login */}
-                <Typography
-                    variant="body2"
-                    textAlign="center"
-                    mt={3}
-                    color="text.secondary"
-                >
-                    Already a user?{" "}
-                    <Link
-                        component={RouterLink}
-                        to="/login"
-                        underline="hover"
-                        sx={{ fontWeight: 500 }}
-                    >
-                        Login
-                    </Link>
-                </Typography>
-            </CardContent>
-        </Card>
+          <Typography
+            variant="body2"
+            textAlign="center"
+            mt={3}
+            color="text.secondary"
+          >
+            Already a user?{" "}
+            <Link
+              component={RouterLink}
+              to="/login"
+              underline="hover"
+              sx={{ fontWeight: 500 }}
+            >
+              Login
+            </Link>
+          </Typography>
+        </CardContent>
+      </Card>
     </Box>
-);
+  );
 };
 
 export default PatientRegister;
