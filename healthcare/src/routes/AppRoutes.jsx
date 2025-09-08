@@ -3,7 +3,6 @@ import ProtectedRoute from "../components/Provider/ProtectedRoute";
 
 // Patient Pages
 import BookAppointment from "../pages/patient/BookAppointment";
-import DoctorProfile from "../pages/patient/DoctorProfile";
 import DoctorsList from "../pages/patient/DoctorsList";
 import MedicalHistory from "../pages/patient/MedicalHistory";
 import MyAppointments from "../pages/patient/MyAppointments";
@@ -38,7 +37,6 @@ export default function AppRoutes() {
           <Route path="/patient" element={<PatientLayout />}>
             <Route index element={<Profile />} />
             <Route path="book-appointment" element={<BookAppointment />} />
-            <Route path="doctor-profile" element={<DoctorProfile />} />
             <Route path="doctors-list" element={<DoctorsList />} />
             <Route path="medical-history" element={<MedicalHistory />} />
             <Route path="my-appointments" element={<MyAppointments />} />
