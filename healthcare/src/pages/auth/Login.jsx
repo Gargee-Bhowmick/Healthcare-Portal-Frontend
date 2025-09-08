@@ -33,8 +33,10 @@ const Login = () => {
 
       // ✅ redirect to correct landing page
       if (data.role === "doctor") {
+        //localStorage.setItem("patient_id", data.patient_id);
         navigate("/doctor/profile"); // or /doctor/dashboard
       } else if (data.role === "patient") {
+        localStorage.setItem("patient_id", data.patient_id);
         navigate("/patient/profile"); // or /patient/dashboard
       } else {
         setError("Unknown user role");

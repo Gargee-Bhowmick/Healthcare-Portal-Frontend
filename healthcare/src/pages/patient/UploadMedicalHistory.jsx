@@ -1,189 +1,141 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  MenuItem,
-  Button,
-  Card,
-  CardContent,
-  LinearProgress,
-  Alert,
-  Grid,
-} from "@mui/material";
+import { Box, Typography, TextField, Button, Card, CardContent, LinearProgress, Alert, Grid } from "@mui/material";
 
-const UploadMedicalRecords = () => {
+const UploadMedicalHistory = () => {
   const [formData, setFormData] = useState({
     title: "",
-    category: "",
-    date: "",
-    doctorName: "",
-    hospital: "",
-    description: "",
+    record_date: "",
+    doctor_name: "",
+    notes: "",
+    file: null,
   });
-
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const categories = [
-    "Lab Results",
-    "X-Ray/Imaging",
-    "Prescription",
-    "Medical Report",
-    "Vaccination Record",
-    "Surgery Report",
-    "Discharge Summary",
-  ];
+  const [error, setError] = useState("");
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (error) setError("");
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.category) newErrors.category = "Category is required";
-    if (!formData.date) newErrors.date = "Date is required";
-    if (!formData.doctorName.trim()) newErrors.doctorName = "Doctor name is required";
-    if (!formData.hospital.trim()) newErrors.hospital = "Hospital/Clinic is required";
-    if (!formData.description.trim()) newErrors.description = "Description is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleFileChange = (e) => {
+    setFormData(prev => ({ ...prev, file: e.target.files[0] }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    setError("");
+    
+    const patientId = localStorage.getItem("patient_id");
+    const token = localStorage.getItem("access_token");
+
+    if (!patientId || !token) {
+      setError("Patient not logged in. Please login again.");
+      return;
+    }
+
+    if (!formData.title || !formData.record_date || !formData.doctor_name || !formData.file) {
+      setError("Please fill all required fields and attach a file.");
+      return;
+    }
+
+    const uploadData = new FormData();
+    uploadData.append("title", formData.title);
+    uploadData.append("record_date", formData.record_date);
+    uploadData.append("doctor_name", formData.doctor_name);
+    uploadData.append("notes", formData.notes || "");
+    uploadData.append("file", formData.file);
 
     setUploading(true);
     setUploadProgress(0);
 
-    const progressInterval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(progressInterval);
-          return 95;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 200);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const res = await fetch(`https://hms-b0e0ash9b3fda7ab.southeastasia-01.azurewebsites.net/patients/${patientId}/u_medical_records/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: uploadData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || "Upload failed");
+      }
+
       setUploadProgress(100);
       setShowSuccess(true);
+
       setTimeout(() => {
-        setFormData({ title: "", category: "", date: "", doctorName: "", hospital: "", description: "" });
+        setFormData({ title: "", record_date: "", doctor_name: "", notes: "", file: null });
         setUploading(false);
         setUploadProgress(0);
         setShowSuccess(false);
       }, 3000);
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
       setUploading(false);
     }
   };
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, color: "#1976d2", mb: 1 }}>
-          Upload Medical Records
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Add new medical records to your health history
-        </Typography>
-      </Box>
+      <Typography variant="h4" sx={{ fontWeight: 600, color: "#1976d2", mb: 2 }}>
+        Upload Medical Record
+      </Typography>
 
-      {showSuccess && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          Medical record uploaded successfully!
-        </Alert>
-      )}
+      {showSuccess && <Alert severity="success" sx={{ mb: 2 }}>Medical record uploaded successfully!</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>Basic Information</Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Title"
                 fullWidth
+                required
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
-                error={!!errors.title}
-                helperText={errors.title}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                select
-                label="Category"
-                fullWidth
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
-                error={!!errors.category}
-                helperText={errors.category}
-              >
-                {categories.map((c) => (
-                  <MenuItem key={c} value={c}>{c}</MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                type="date"
-                label="Date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={formData.date}
-                onChange={(e) => handleInputChange("date", e.target.value)}
-                error={!!errors.date}
-                helperText={errors.date}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Description"
-                fullWidth
-                multiline
-                rows={3}
-                value={formData.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
-                error={!!errors.description}
-                helperText={errors.description}
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>Healthcare Provider</Typography>
-          <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Doctor Name"
                 fullWidth
-                value={formData.doctorName}
-                onChange={(e) => handleInputChange("doctorName", e.target.value)}
-                error={!!errors.doctorName}
-                helperText={errors.doctorName}
+                required
+                value={formData.doctor_name}
+                onChange={(e) => handleInputChange("doctor_name", e.target.value)}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Hospital/Clinic"
+                type="date"
+                label="Record Date"
                 fullWidth
-                value={formData.hospital}
-                onChange={(e) => handleInputChange("hospital", e.target.value)}
-                error={!!errors.hospital}
-                helperText={errors.hospital}
+                required
+                InputLabelProps={{ shrink: true }}
+                value={formData.record_date}
+                onChange={(e) => handleInputChange("record_date", e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button variant="outlined" component="label" fullWidth>
+                Upload File *
+                <input type="file" hidden onChange={handleFileChange} />
+              </Button>
+              {formData.file && <Typography>{formData.file.name}</Typography>}
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Notes"
+                fullWidth
+                multiline
+                rows={3}
+                value={formData.notes}
+                onChange={(e) => handleInputChange("notes", e.target.value)}
               />
             </Grid>
           </Grid>
@@ -191,29 +143,19 @@ const UploadMedicalRecords = () => {
       </Card>
 
       {uploading && (
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography gutterBottom>Uploading Medical Record...</Typography>
-            <LinearProgress variant="determinate" value={uploadProgress} />
-            <Typography variant="body2" align="center" sx={{ mt: 1 }}>
-              {Math.round(uploadProgress)}% Complete
-            </Typography>
-          </CardContent>
-        </Card>
+        <LinearProgress variant="determinate" value={uploadProgress} sx={{ mb: 2 }} />
       )}
 
       <Box display="flex" justifyContent="flex-end" gap={2}>
-        <Button onClick={() => setFormData({ title: "", category: "", date: "", doctorName: "", hospital: "", description: "" })} disabled={uploading}>
+        <Button disabled={uploading} onClick={() => setFormData({ title: "", record_date: "", doctor_name: "", notes: "", file: null })}>
           Reset
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={uploading}>
+        <Button variant="contained" disabled={uploading} onClick={handleSubmit}>
           {uploading ? "Uploading..." : "Upload Record"}
         </Button>
       </Box>
-
-      
     </Box>
   );
 };
 
-export default UploadMedicalRecords;
+export default UploadMedicalHistory;
