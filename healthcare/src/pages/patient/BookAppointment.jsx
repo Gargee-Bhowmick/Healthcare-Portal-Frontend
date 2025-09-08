@@ -34,6 +34,7 @@ const BookAppointment = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
+        
         const res = await fetch(
           "https://hms-b0e0ash9b3fda7ab.southeastasia-01.azurewebsites.net/doctors/"
         );
